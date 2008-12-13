@@ -348,11 +348,26 @@ if ( !function_exists('ob_multipart_author_form') ) :
 
 function ob_multipart_author_form_callback($buffer)
 {
-	$buffer = str_replace(
-		'<form name="profile"',
-		'<form enctype="multipart/form-data" name="profile"',
-		$buffer
-		);
+	global $wp_version;
+	
+	if ( version_compare($wp_version, '2.7', '>=') )
+	{
+		$buffer = str_replace(
+			'<form id="your-profile"',
+			'<form enctype="multipart/form-data" id="your-profile"',
+			$buffer
+			);
+	}
+	else
+	{
+		$buffer = str_replace(
+			'<form name="profile"',
+			'<form enctype="multipart/form-data" name="profile"',
+			$buffer
+			);
+	}
+	
+	
 	return $buffer;
 } # ob_multipart_author_form_callback()
 
