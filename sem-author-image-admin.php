@@ -381,6 +381,7 @@ function ob_multipart_author_form()
 	ob_start('ob_multipart_author_form_callback');
 } # ob_multipart_author_form()
 
-add_action('admin_head', 'ob_multipart_author_form');
+add_action('load-profile.php', 'ob_multipart_author_form');
+add_action('load-user-edit.php', 'ob_multipart_author_form');
 endif;
 ?>
