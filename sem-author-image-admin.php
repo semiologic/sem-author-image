@@ -151,8 +151,9 @@ class author_image_admin
 			}
 
 			$tmp_name =& $_FILES['author_image']['tmp_name'];
-
-			$ext = pathinfo($_FILES['author_image']['name'], PATHINFO_EXTENSION);
+			
+			preg_match("/\.(jpe?g|gif|png)$/i", $_FILES['author_image']['name'], $ext);
+			$ext = end($ext);
 			$ext = strtolower($ext);
 
 			if ( !in_array($ext, array('jpg', 'jpeg', 'png')) )
