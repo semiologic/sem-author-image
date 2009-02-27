@@ -152,7 +152,7 @@ class author_image_admin
 
 			$tmp_name =& $_FILES['author_image']['tmp_name'];
 			
-			preg_match("/\.(.+?)$/i", $_FILES['author_image']['name'], $ext);
+			preg_match("/\.([^.]+)$/", $_FILES['author_image']['name'], $ext);
 			$ext = end($ext);
 			$ext = strtolower($ext);
 
