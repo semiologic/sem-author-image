@@ -3,7 +3,7 @@
 Plugin Name: Author Image
 Plugin URI: http://www.semiologic.com/software/publishing/author-image/
 Description: Adds the authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.
-Version: 3.1.3 RC
+Version: 3.1.3 alpha
 Author: Denis de Bernardy
 Author URI: http://www.getsemiologic.com
 */
@@ -200,7 +200,7 @@ class author_image
 
 		if ( $GLOBALS['author_image_cache'][$author_id] )
 		{
-			$site_url = trailingslashit(get_option('siteurl'));
+			$site_url = trailingslashit(site_url());
 
 			return '<div class="entry_author_image">'
 				. '<img src="'
@@ -267,7 +267,7 @@ class author_image
 
 		if ( $GLOBALS['author_image_cache'][$author_id] )
 		{
-			$site_url = trailingslashit(get_option('siteurl'));
+			$site_url = trailingslashit(site_url());
 
 			return '<div class="entry_author_image">'
 				. '<img src="'

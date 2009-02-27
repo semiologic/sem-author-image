@@ -22,7 +22,7 @@ class author_image_admin
 	{
 		$author_id = $GLOBALS['profileuser']->user_login;
 
-		$site_url = trailingslashit(get_option('siteurl'));
+		$site_url = trailingslashit(site_url());
 
 		if ( defined('GLOB_BRACE') )
 		{
