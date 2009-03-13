@@ -3,7 +3,7 @@
 Plugin Name: Author Image
 Plugin URI: http://www.semiologic.com/software/publishing/author-image/
 Description: Adds the authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.
-Version: 3.1.3 alpha
+Version: 3.2 alpha
 Author: Denis de Bernardy
 Author URI: http://www.getsemiologic.com
 */
@@ -18,56 +18,58 @@ http://www.opensource.org/licenses/gpl-2.0.php
 **/
 
 
-class author_image
-{
-	#
-	# init()
-	#
-
-	function init()
-	{
-		add_action('widgets_init', array('author_image', 'widgetize'));
-	} # init()
+load_plugin_textdomain('sem-author-image', null, basename(dirname(__FILE__)) . '/lang');
 
 
-	#
-	# widgetize()
-	#
+/**
+ * author_image
+ *
+ * @package Author Image
+ **/
 
-	function widgetize()
-	{
+add_action('widgets_init', array('author_image', 'widgetize'));
+
+class author_image {
+	/**
+	 * widgetize()
+	 *
+	 * @return void
+	 **/
+
+	function widgetize() {
 		$options = author_image::get_options();
 		
-		$widget_options = array('classname' => 'author_image', 'description' => __( "Displays the post author's image") );
-		$control_options = array('width' => 460, 'id_base' => 'author_image');
+		$widget_options = array('classname' => 'author_image', 'description' => __( "Displays the post author's image", 'sem-author-image') );
+		$control_options = array('id_base' => 'author_image');
 		
 		$id = false;
 		
 		# registered widgets
-		foreach ( array_keys($options) as $o )
-		{
+		foreach ( array_keys($options) as $o ) {
 			if ( !is_numeric($o) ) continue;
 			$id = "author_image-$o";
-			wp_register_sidebar_widget($id, __('Author Image'), array('author_image', 'widget'), $widget_options, array( 'number' => $o ));
-			wp_register_widget_control($id, __('Author Image'), array('author_image_admin', 'widget_control'), $control_options, array( 'number' => $o ) );
+			wp_register_sidebar_widget($id, __('Author Image', 'sem-author-image'), array('author_image', 'widget'), $widget_options, array( 'number' => $o ));
+			wp_register_widget_control($id, __('Author Image', 'sem-author-image'), array('author_image_admin', 'widget_control'), $control_options, array( 'number' => $o ) );
 		}
 		
 		# default widget if none were registered
-		if ( !$id )
-		{
+		if ( !$id ) {
 			$id = "author_image-1";
-			wp_register_sidebar_widget($id, __('Author Image'), array('author_image', 'widget'), $widget_options, array( 'number' => -1 ));
-			wp_register_widget_control($id, __('Author Image'), array('author_image_admin', 'widget_control'), $control_options, array( 'number' => -1 ) );
+			wp_register_sidebar_widget($id, __('Author Image', 'sem-author-image'), array('author_image', 'widget'), $widget_options, array( 'number' => -1 ));
+			wp_register_widget_control($id, __('Author Image', 'sem-author-image'), array('author_image_admin', 'widget_control'), $control_options, array( 'number' => -1 ) );
 		}
 	} # widgetize()
+	
+	
+	/**
+	 * widget()
+	 *
+	 * @param array $args Widget args
+	 * @param int $widget_args Widget number
+	 * @return void
+	 **/
 
-
-	#
-	# widget()
-	#
-
-	function widget($args, $widget_args = 1)
-	{
+	function widget($args, $widget_args = 1) {
 		if ( is_numeric($widget_args) )
 			$widget_args = array( 'number' => $widget_args );
 		$widget_args = wp_parse_args( $widget_args, array( 'number' => -1 ) );
@@ -75,18 +77,13 @@ class author_image
 
 		$options = author_image::get_options();
 		
-		if ( $options[$number]['always'] )
-		{
-			$image = author_image::get_single_author_image();
-			
-		}
-		elseif ( in_the_loop() || is_singular() )
-		{
+		if ( $options[$number]['always'] ) {
+			$image = author_image::get_single();
+		} elseif ( in_the_loop() || is_singular() ) {
 			$image = author_image::get();
 		}
 		
-		if ( $image )
-		{
+		if ( $image ) {
 			echo $args['before_widget'] . "\n"
 				. $image . "\n"
 				. $args['after_widget'] . "\n";
@@ -94,20 +91,21 @@ class author_image
 	} # widget()
 	
 	
-	#
-	# get_single_author_image()
-	#
+	/**
+	 * get_single()
+	 *
+	 * @return string $image
+	 **/
 	
-	function get_single_author_image()
-	{
-		$author_id = get_option('single_author_id_cache');
+	function get_single() {
+		$author_image = get_option('author_image_cache');
 		
-		if ( $author_id === '' )
-		{
+		if ( $author_image === '' ) {
 			return;
-		}
-		elseif ( !$author_id )
-		{
+		} elseif ( !is_dir(WP_CONTENT_DIR . '/authors') ) {
+			update_option('author_image_cache', '');
+			return;
+		} elseif ( !$author_image ) {
 			global $wpdb;
 			$i = 0;
 			
@@ -116,196 +114,121 @@ class author_image
 				$limit = ( $i + 1 ) * 10;
 				
 				$authors = $wpdb->get_col("
-					SELECT	user_login
+					SELECT	$wpdb->users.user_login
 					FROM	$wpdb->users
-					ORDER BY ID
+					JOIN	$wpdb->usermeta
+					ON		$wpdb->usermeta.user_id = $wpdb->users.ID
+					AND		$wpdb->usermeta.meta_key = '" . $wpdb->prefix . "capabilities'
+					ORDER BY $wpdb->users.ID
 					LIMIT $offset, $limit
 					");
-
-				if ( !$authors )
-				{
-					break;
-				}
 				
-				foreach ( $authors as $author_id )
-				{
-					if ( defined('GLOB_BRACE') )
-					{
-						if ( $image = glob(ABSPATH . 'wp-content/authors/' . $author_id . '{,-*}.{jpg,jpeg,png}', GLOB_BRACE) )
-						{
-							$image = current($image);
+				if ( !$authors ) {
+					update_option('author_image_cache', '');
+					return;
+				}
+
+				foreach ( $authors as $author_id ) {
+					if ( defined('GLOB_BRACE') ) {
+						if ( $author_image = glob(WP_CONTENT_DIR . '/authors/' . $author_id . '{,-*}.{jpg,jpeg,png}', GLOB_BRACE) ) {
+							$author_image = current($author_image);
+						} else {
+							$author_image = false;
 						}
-						else
-						{
-							$image = false;
-						}
-					}
-					else
-					{
-						if ( $image = glob(ABSPATH . 'wp-content/authors/' . $author_id . '-*.jpg') )
-						{
-							$image = current($image);
-						}
-						else
-						{
-							$image = false;
+					} else {
+						if ( $author_image = glob(WP_CONTENT_DIR . '/authors/' . $author_id . '-*.jpg') ) {
+							$author_image = current($author_image);
+						} else {
+							$author_image = false;
 						}
 					}
-					
-					if ( $image )
-					{
-						update_option('single_author_id_cache', $author_id);
-						$GLOBALS['author_image_cache'][$author_id] = $image;
+
+					if ( $author_image ) {
+						$author_image = basename($author_image);
+						update_option('author_image_cache', $author_image);
 						break;
 					}
 				}
 				
 				$i++;
-			} while ( !$image );
+			} while ( !$author_image );
 			
-			if ( !$image )
-			{
-				# no image whatsoever was found...
-				update_option('single_author_id_cache', '');
+			if ( !$author_image ) {
+				update_option('author_image_cache', '');
+				return;
 			}
 		}
 		
-		if ( $author_id && !$image )
-		{
-			if ( defined('GLOB_BRACE') )
-			{
-				if ( $image = glob(ABSPATH . 'wp-content/authors/' . $author_id . '{,-*}.{jpg,jpeg,png}', GLOB_BRACE) )
-				{
-					$image = current($image);
-				}
-				else
-				{
-					$image = false;
-				}
-			}
-			else
-			{
-				if ( $image = glob(ABSPATH . 'wp-content/authors/' . $author_id . '-*.jpg') )
-				{
-					$image = current($image);
-				}
-				else
-				{
-					$image = false;
-				}
-			}
-			
-			$GLOBALS['author_image_cache'][$author_id] = $image;
-		}
-
-		if ( $GLOBALS['author_image_cache'][$author_id] )
-		{
-			$site_url = trailingslashit(site_url());
-
-			return '<div class="entry_author_image">'
-				. '<img src="'
-						. str_replace(ABSPATH, $site_url, $GLOBALS['author_image_cache'][$author_id])
-						. '"'
-					. ' alt=""'
-					. ' />'
-				. '</div>';
-		}
+		$author_image = content_url() . '/authors/' . $author_image;
+		$author_image = clean_url($author_image);
 		
-		return $author_image;
-	} # get_single_author_image()
+		return '<div class="entry_author_image">'
+			. '<img src="' . htmlspecialchars($author_image) . '" alt="" />'
+			. '</div>' . "\n";
+	} # get_single()
+	
+	
+	/**
+	 * get()
+	 *
+	 * @return string $image
+	 **/
 
-
-	#
-	# get()
-	#
-
-	function get()
-	{
-		if ( in_the_loop() )
-		{
-			$author_id = get_the_author_login();
-		}
-		else
-		{
+	function get() {
+		if ( in_the_loop() ) {
+			$author_id = get_the_author_id();
+		} elseif ( is_singular() ) {
 			global $wp_query;
 			
-			if ( $wp_query->posts )
-			{
+			if ( $wp_query->posts ) {
 				$author_id = $wp_query->posts[0]->post_author;
 				$user = wp_cache_get($author_id, 'users');
-				$author_id = $user->user_login;
+				$author_login = $user->user_login;
 			}
+		} else {
+			return;
 		}
 		
-		if ( !isset($GLOBALS['author_image_cache'][$author_id]) )
-		{
-			if ( defined('GLOB_BRACE') )
-			{
-				if ( $image = glob(ABSPATH . 'wp-content/authors/' . $author_id . '{,-*}.{jpg,jpeg,png}', GLOB_BRACE) )
-				{
-					$image = current($image);
-				}
-				else
-				{
-					$image = false;
-				}
-			}
-			else
-			{
-				if ( $image = glob(ABSPATH . 'wp-content/authors/' . $author_id . '-*.jpg') )
-				{
-					$image = current($image);
-				}
-				else
-				{
-					$image = false;
-				}
-			}
-			
-			$GLOBALS['author_image_cache'][$author_id] = $image;
+		$author_image = get_usermeta($author_id, 'author_image');
+		
+		if ( $author_image === '' ) {
+			$author_image = author_image::get_meta($author_id);
 		}
-
-		if ( $GLOBALS['author_image_cache'][$author_id] )
-		{
-			$site_url = trailingslashit(site_url());
-
-			return '<div class="entry_author_image">'
-				. '<img src="'
-						. str_replace(ABSPATH, $site_url, $GLOBALS['author_image_cache'][$author_id])
-						. '"'
-					. ' alt=""'
-					. ' />'
-				. '</div>';
+		
+		if ( !$author_image ) {
+			return;
 		}
+		
+		$author_image = content_url() . '/authors/' . $author_image;
+		$author_image = clean_url($author_image);
+		
+		return '<div class="entry_author_image">'
+			. '<img src="' . htmlspecialchars($author_image) . '" alt="" />'
+			. '</div>' . "\n";
 	} # get()
 	
 	
-	#
-	# get_options()
-	#
+	/**
+	 * get_options()
+	 *
+	 * @return array $options
+	 **/
 	
-	function get_options()
-	{
-		if ( ( $o = get_option('author_image_widgets') ) === false )
-		{
+	function get_options() {
+		if ( ( $o = get_option('author_image_widgets') ) === false ) {
 			$o = array();
 			
-			foreach ( array_keys( (array) $sidebars = get_option('sidebars_widgets') ) as $k )
-			{
-				if ( !is_array($sidebars[$k]) )
-				{
+			foreach ( array_keys( (array) $sidebars = get_option('sidebars_widgets') ) as $k ) {
+				if ( !is_array($sidebars[$k]) ) {
 					continue;
 				}
 				
-				if ( ( $key = array_search('author-image', $sidebars[$k]) ) !== false )
-				{
+				if ( ( $key = array_search('sem-author-image', $sidebars[$k]) ) !== false ) {
 					$o[1] = author_image::default_options();
 					$sidebars[$k][$key] = 'author_image-1';
 					update_option('sidebars_widgets', $sidebars);
 					break;
-				}
-				elseif ( ( $key = array_search('Author Image', $sidebars[$k]) ) !== false )
-				{
+				} elseif ( ( $key = array_search('Author Image', $sidebars[$k]) ) !== false ) {
 					$o[1] = author_image::default_options();
 					$sidebars[$k][$key] = 'author_image-1';
 					update_option('sidebars_widgets', $sidebars);
@@ -320,50 +243,118 @@ class author_image
 	} # get_options()
 	
 	
-	#
-	# new_widget()
-	#
+	/**
+	 * new_widget()
+	 *
+	 * @return string $widget_id
+	 **/
 	
-	function new_widget()
-	{
+	function new_widget($k = null) {
 		$o = author_image::get_options();
-		$k = time();
-		do $k++; while ( isset($o[$k]) );
-		$o[$k] = author_image::default_options();
 		
-		update_option('author_image_widgets', $o);
+		if ( !( isset($k) && isset($o[$k]) ) ) {
+			$k = time();
+			while ( isset($o[$k]) ) $k++;
+			$o[$k] = author_image::default_options();
+			
+			update_option('author_image_widgets', $o);
+		}
 		
 		return 'author_image-' . $k;
 	} # new_widget()
 	
 	
-	#
-	# default_options()
-	#
+	/**
+	 * default_options()
+	 *
+	 * @return array $widget_options
+	 **/
 	
-	function default_options()
-	{
+	function default_options() {
 		return array(
 			'always' => false
 			);
 	} # default_options()
+	
+	
+	/**
+	 * get_meta()
+	 *
+	 * @param int $author_id
+	 * @return string $image
+	 **/
+
+	function get_meta($author_id) {
+		$user = wp_cache_get($author_id, 'users');
+		$author_login = $user->user_login;
+		
+		if ( defined('GLOB_BRACE') ) {
+			if ( $author_image = glob(WP_CONTENT_DIR . '/authors/' . $author_login . '{,-*}.{jpg,jpeg,png}', GLOB_BRACE) ) {
+				$author_image = current($author_image);
+			} else {
+				$author_image = false;
+			}
+		} else {
+			if ( $author_image = glob(WP_CONTENT_DIR . '/authors/' . $author_login . '-*.jpg') ) {
+				$author_image = current($author_image);
+			} else {
+				$author_image = false;
+			}
+		}
+		
+		if ( $author_image ) {
+			$author_image = basename($author_image);
+			if ( !get_option('author_image_cache') ) {
+				update_option('author_image_cache', $author_image);
+			}
+		} else {
+			$author_image = 0;
+		}
+		
+		update_usermeta($author_id, 'author_image', $author_image);
+		
+		return $author_image;
+	} # get_meta()
 } # author_image
 
-author_image::init();
 
+/**
+ * the_author_image()
+ *
+ * @return void
+ **/
 
-#
-# the_author_image()
-#
-
-function the_author_image()
-{
+function the_author_image() {
 	echo author_image::get();
-} # end the_author_image()
+} # the_author_image()
 
 
-if ( is_admin() )
-{
+/**
+ * author_image_admin()
+ *
+ * @return void
+ **/
+
+function author_image_admin() {
 	include dirname(__FILE__) . '/sem-author-image-admin.php';
-}
+} # author_image_admin()
+
+foreach ( array('widgets', 'profile', 'user-edit') as $admin_page )
+	add_action("load-$admin_page.php", 'author_image_admin');
+
+
+/**
+ * multipart_user()
+ *
+ * @return @void
+ **/
+
+if ( !function_exists('multipart_user') ) :
+function multipart_user() {
+	include dirname(__FILE__) . '/multipart-user/multipart-user.php';
+} # multipart_user()
+
+foreach ( array('profile', 'user-edit') as $admin_page )
+	add_action("load-$admin_page.php", 'multipart_user');
+endif;
 ?>
