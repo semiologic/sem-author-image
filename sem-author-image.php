@@ -174,19 +174,21 @@ class author_image {
 	 * @return string $image
 	 **/
 
-	function get() {
-		if ( in_the_loop() ) {
-			$author_id = get_the_author_id();
-		} elseif ( is_singular() ) {
-			global $wp_query;
-			
-			if ( $wp_query->posts ) {
-				$author_id = $wp_query->posts[0]->post_author;
-				$user = wp_cache_get($author_id, 'users');
-				$author_login = $user->user_login;
+	function get($author_id = null) {
+		if ( !$author_id ) {
+			if ( in_the_loop() ) {
+				$author_id = get_the_author_id();
+			} elseif ( is_singular() ) {
+				global $wp_query;
+
+				if ( $wp_query->posts ) {
+					$author_id = $wp_query->posts[0]->post_author;
+					$user = wp_cache_get($author_id, 'users');
+					$author_login = $user->user_login;
+				}
+			} else {
+				return;
 			}
-		} else {
-			return;
 		}
 		
 		$author_image = get_usermeta($author_id, 'author_image');
@@ -324,8 +326,8 @@ class author_image {
  * @return void
  **/
 
-function the_author_image() {
-	echo author_image::get();
+function the_author_image($user_id = 0) {
+	echo author_image::get($user_id);
 } # the_author_image()
 
 
