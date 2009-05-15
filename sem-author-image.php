@@ -18,7 +18,7 @@ http://www.opensource.org/licenses/gpl-2.0.php
 **/
 
 
-load_plugin_textdomain('sem-author-image', null, plugin_dir_path(__FILE__) . '/lang');
+load_plugin_textdomain('sem-author-image', null, dirname(__FILE__) . '/lang');
 
 
 /**
