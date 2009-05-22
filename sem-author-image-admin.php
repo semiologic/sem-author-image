@@ -46,7 +46,7 @@ class author_image_admin {
 		
 		$author_image = author_image::get_meta($author_id);
 		$author_image_url = content_url() . '/authors/' . $author_image;
-		$author_image_url = clean_url($author_image_url);
+		$author_image_url = esc_url($author_image_url);
 		
 		echo '<table class="form-table">';
 		

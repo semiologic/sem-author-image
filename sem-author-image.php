@@ -160,7 +160,7 @@ class author_image {
 		}
 		
 		$author_image = content_url() . '/authors/' . $author_image;
-		$author_image = clean_url($author_image);
+		$author_image = esc_url($author_image);
 		
 		return '<div class="entry_author_image">'
 			. '<img src="' . htmlspecialchars($author_image) . '" alt="" />'
@@ -202,7 +202,7 @@ class author_image {
 		}
 		
 		$author_image = content_url() . '/authors/' . $author_image;
-		$author_image = clean_url($author_image);
+		$author_image = esc_url($author_image);
 		
 		return '<div class="entry_author_image">'
 			. '<img src="' . htmlspecialchars($author_image) . '" alt="" />'
