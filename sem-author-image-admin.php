@@ -179,7 +179,9 @@ class author_image_admin {
 					move_uploaded_file($tmp_name, $new_name);
 				}
 				
-				chmod($new_name, 0666);
+				$stat = stat(dirname($new_name));
+				$perms = $stat['mode'] & 0000666;
+				@chmod($new_name, $perms);
 			}
 			
 			delete_option('single_author_id_cache');
