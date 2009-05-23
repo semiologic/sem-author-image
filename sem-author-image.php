@@ -3,9 +3,11 @@
 Plugin Name: Author Image
 Plugin URI: http://www.semiologic.com/software/author-image/
 Description: Adds the authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.
-Version: 3.2 RC
+Version: 3.2 alpha
 Author: Denis de Bernardy
 Author URI: http://www.getsemiologic.com
+Text Domain: sem-author-image-info
+Domain Path: /lang
 */
 
 /*
