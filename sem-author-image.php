@@ -343,8 +343,8 @@ function author_image_admin() {
 	include dirname(__FILE__) . '/sem-author-image-admin.php';
 } # author_image_admin()
 
-foreach ( array('widgets', 'profile', 'user-edit') as $admin_page )
-	add_action("load-$admin_page.php", 'author_image_admin');
+foreach ( array('widgets', 'profile', 'user-edit') as $hook )
+	add_action("load-$hook.php", 'author_image_admin');
 
 
 /**
@@ -358,7 +358,7 @@ function multipart_user() {
 	include dirname(__FILE__) . '/multipart-user/multipart-user.php';
 } # multipart_user()
 
-foreach ( array('profile', 'user-edit') as $admin_page )
-	add_action("load-$admin_page.php", 'multipart_user');
+foreach ( array('profile', 'user-edit') as $hook )
+	add_action("load-$hook.php", 'multipart_user');
 endif;
 ?>
