@@ -357,8 +357,8 @@ if ( !function_exists('load_multipart_user') ) :
 function load_multipart_user() {
 	include dirname(__FILE__) . '/multipart-user/multipart-user.php';
 } # load_multipart_user()
+endif;
 
 foreach ( array('profile', 'user-edit') as $hook )
 	add_action("load-$hook.php", 'load_multipart_user');
-endif;
 ?>
