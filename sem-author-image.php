@@ -348,17 +348,17 @@ foreach ( array('widgets', 'profile', 'user-edit') as $hook )
 
 
 /**
- * multipart_user()
+ * load_multipart_user()
  *
  * @return @void
  **/
 
-if ( !function_exists('multipart_user') ) :
-function multipart_user() {
+if ( !function_exists('load_multipart_user') ) :
+function load_multipart_user() {
 	include dirname(__FILE__) . '/multipart-user/multipart-user.php';
-} # multipart_user()
+} # load_multipart_user()
 
 foreach ( array('profile', 'user-edit') as $hook )
-	add_action("load-$hook.php", 'multipart_user');
+	add_action("load-$hook.php", 'load_multipart_user');
 endif;
 ?>
