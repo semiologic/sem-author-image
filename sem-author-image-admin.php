@@ -2,7 +2,7 @@
 /**
  * author_image_admin
  *
- * @package default
+ * @package Author Image
  **/
 
 add_action('edit_user_profile', array('author_image_admin', 'edit_image'));
