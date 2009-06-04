@@ -17,18 +17,13 @@ class author_image_admin {
 	 **/
 	
 	function edit_image() {
-		if ( !is_dir(WP_CONTENT_DIR . '/authors') ) {
-			if ( !is_writable(WP_CONTENT_DIR) ) {
-				echo '<div class="error">'
-					. '<p>'
-					. sprintf(__('Author Images requires that your %s folder be writable by the server', 'sem-author-image'), 'wp-content')
-					. '</p>'
-					. '</div>' . "\n";
-				return;
-			} else {
-				mkdir(WP_CONTENT_DIR . '/authors');
-				chmod(WP_CONTENT_DIR . '/authors', 0777);
-			}
+		if ( !is_dir(WP_CONTENT_DIR . '/authors') && !wp_mkdir_p(WP_CONTENT_DIR . '/authors') ) {
+			echo '<div class="error">'
+				. '<p>'
+				. sprintf(__('Author Images requires that your %s folder be writable by the server', 'sem-author-image'), 'wp-content')
+				. '</p>'
+				. '</div>' . "\n";
+			return;
 		} elseif ( !is_writable(WP_CONTENT_DIR . '/authors') ) {
 			echo '<div class="error">'
 				. '<p>'
@@ -42,25 +37,24 @@ class author_image_admin {
 			. __('Author Image', 'sem-author-image')
 			. '</h3>';
 		
-		$author_id = $GLOBALS['profileuser']->ID;
+		global $profileuser;
+		$author_id = $profileuser->ID;
 		
 		$author_image = author_image::get_meta($author_id);
 		$author_image_url = content_url() . '/authors/' . $author_image;
-		$author_image_url = esc_url($author_image_url);
 		
 		echo '<table class="form-table">';
 		
 		if ( $author_image ) {
 			echo '<tr valign="top">'
 				. '<td colspan="2">'
-				. '<img src="' . $author_image_url . '" alt="" />'
+				. '<img src="' . esc_url($author_image_url) . '" alt="" />'
 				. '<br />'. "\n";
 			
 			if ( is_writable(WP_CONTENT_DIR . '/authors/' . $author_image) ) {
 				echo '<label for="delete_author_image">'
 					. '<input type="checkbox"'
 						. ' id="delete_author_image" name="delete_author_image"'
-						. ' style="text-align: left; width: auto;"'
 						. ' />'
 					. '&nbsp;'
 					. __('Delete author image', 'sem-author-image')
@@ -75,7 +69,7 @@ class author_image_admin {
 		if ( !$author_image || is_writable(WP_CONTENT_DIR . '/authors/' . $author_image) ) {
 			echo '<tr valign-"top">'
 				. '<th scope="row">'
-				. 'New Image'
+				. __('New Image', 'sem-author-image')
 				. '</th>'
 				. '<td>';
 			
@@ -181,8 +175,7 @@ class author_image_admin {
 				@chmod($new_name, $perms);
 			}
 			
-			delete_option('single_author_id_cache');
-			delete_option('author_image_cache');
+			delete_transient('author_image_cache');
 			delete_usermeta($user_ID, 'author_image_cache');
 		} elseif ( isset($_POST['delete_author_image']) ) {
 			$user = get_userdata($user_ID);
@@ -206,91 +199,11 @@ class author_image_admin {
 				}
 			}
 			
-			delete_option('single_author_id_cache');
-			delete_option('author_image_cache');
+			delete_transient('author_image_cache');
 			delete_usermeta($user_ID, 'author_image_cache');
 		}
 
 		return $user_ID;
 	} # save_image()
-	
-	
-	/**
-	 * widget_control()
-	 *
-	 * @return void
-	 **/
-	
-	function widget_control($widget_args) {
-		global $wp_registered_widgets;
-		static $updated = false;
-
-		if ( is_numeric($widget_args) )
-			$widget_args = array( 'number' => $widget_args );
-		$widget_args = wp_parse_args( $widget_args, array( 'number' => -1 ) );
-		extract( $widget_args, EXTR_SKIP ); // extract number
-
-		$options = author_image::get_options();
-
-		if ( !$updated && !empty($_POST['sidebar']) ) {
-			$sidebar = (string) $_POST['sidebar'];
-
-			$sidebars_widgets = wp_get_sidebars_widgets();
-			
-			if ( isset($sidebars_widgets[$sidebar]) )
-				$this_sidebar =& $sidebars_widgets[$sidebar];
-			else
-				$this_sidebar = array();
-
-			foreach ( $this_sidebar as $_widget_id ) {
-				if ( array('author_image', 'widget') == $wp_registered_widgets[$_widget_id]['callback']
-					&& isset($wp_registered_widgets[$_widget_id]['params'][0]['number'])
-					) {
-					$widget_number = $wp_registered_widgets[$_widget_id]['params'][0]['number'];
-					if ( !in_array( "author_image-$widget_number", $_POST['widget-id'] ) ) // the widget has been removed.
-						unset($options[$widget_number]);
-				}
-			}
-
-			foreach ( (array) $_POST['widget-author-image'] as $num => $opt ) {
-				$always = isset($opt['always']);
-				$options[$num] = compact( 'always' );
-			}
-			
-			update_option('author_image_widgets', $options);
-			$updated = true;
-		}
-
-		if ( -1 == $number ) {
-			$ops = author_image::default_options();
-			$number = '%i%';
-		} else {
-			$ops = $options[$number];
-		}
-		
-		extract($ops);
-		
-		echo '<input type="hidden"'
-			. ' name="widget-author-image[' . $number . '][update]"'
-			. ' value="1"'
-			. ' />';
-		
-		echo '<p>'
-			. '<label>'
-			. '<input'
-			. ' name="widget-author-image[' . $number . '][always]"'
-			. ' type="checkbox"'
-			. ( $always
-				? ' checked="checked"'
-				: ''
-				)
-			. ' />'
-			. '&nbsp;' . __('This site has a single author.', 'sem-author-image')
-			. '</label>'
-			. '</p>'
-			. '<p>'
-			. __('When placed outside of the loop, the author image widget only displays its contents on individual posts and pages. Checking the above option will make it display on all of the site\'s pages.', 'sem-author-image')
-			. '</p>';
-	} # widget_control()
 } # author_image_admin
 ?>

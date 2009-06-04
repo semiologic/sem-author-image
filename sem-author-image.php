@@ -3,7 +3,7 @@
 Plugin Name: Author Image
 Plugin URI: http://www.semiologic.com/software/author-image/
 Description: Adds the authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.
-Version: 3.2 alpha
+Version: 4.0 RC
 Author: Denis de Bernardy
 Author URI: http://www.getsemiologic.com
 Text Domain: sem-author-image-info
@@ -29,66 +29,62 @@ load_plugin_textdomain('sem-author-image', null, dirname(__FILE__) . '/lang');
  * @package Author Image
  **/
 
-add_action('widgets_init', array('author_image', 'widgetize'));
+add_action('widgets_init', array('author_image', 'widgets_init'));
 
-class author_image {
+class author_image extends WP_Widget {
+	var $option_name = 'author_image_widgets';
+	
+	
 	/**
-	 * widgetize()
+	 * widgets_init()
 	 *
 	 * @return void
 	 **/
 
-	function widgetize() {
-		$options = author_image::get_options();
+	function widgets_init() {
+		register_widget('author_image');
+	} # widgets_init()
+	
+	
+	/**
+	 * author_image()
+	 *
+	 * @return void
+	 **/
+
+	function author_image() {
+		$widget_ops = array(
+			'classname' => 'author_image',
+			'description' => __("Displays the post author's image", 'sem-author-image'),
+			);
 		
-		$widget_options = array('classname' => 'author_image', 'description' => __( "Displays the post author's image", 'sem-author-image') );
-		$control_options = array('id_base' => 'author_image');
-		
-		$id = false;
-		
-		# registered widgets
-		foreach ( array_keys($options) as $o ) {
-			if ( !is_numeric($o) ) continue;
-			$id = "author_image-$o";
-			wp_register_sidebar_widget($id, __('Author Image', 'sem-author-image'), array('author_image', 'widget'), $widget_options, array( 'number' => $o ));
-			wp_register_widget_control($id, __('Author Image', 'sem-author-image'), array('author_image_admin', 'widget_control'), $control_options, array( 'number' => $o ) );
-		}
-		
-		# default widget if none were registered
-		if ( !$id ) {
-			$id = "author_image-1";
-			wp_register_sidebar_widget($id, __('Author Image', 'sem-author-image'), array('author_image', 'widget'), $widget_options, array( 'number' => -1 ));
-			wp_register_widget_control($id, __('Author Image', 'sem-author-image'), array('author_image_admin', 'widget_control'), $control_options, array( 'number' => -1 ) );
-		}
-	} # widgetize()
+		$this->WP_Widget('author_image', __('Author Image', 'sem-author-image'), $widget_ops);
+	} # author_image()
 	
 	
 	/**
 	 * widget()
 	 *
-	 * @param array $args Widget args
-	 * @param int $widget_args Widget number
+	 * @param array $args
+	 * @param array $instance
 	 * @return void
 	 **/
 
-	function widget($args, $widget_args = 1) {
-		if ( is_numeric($widget_args) )
-			$widget_args = array( 'number' => $widget_args );
-		$widget_args = wp_parse_args( $widget_args, array( 'number' => -1 ) );
-		extract( $widget_args, EXTR_SKIP );
-
-		$options = author_image::get_options();
+	function widget($args, $instance) {
+		extract($args, EXTR_SKIP);
+		$instance = wp_parse_args($instance, author_image::defaults());
+		extract($instance, EXTR_SKIP);
 		
-		if ( $options[$number]['always'] ) {
+		if ( $always ) {
 			$image = author_image::get_single();
 		} elseif ( in_the_loop() || is_singular() ) {
 			$image = author_image::get();
 		}
 		
 		if ( $image ) {
-			echo $args['before_widget'] . "\n"
+			echo $before_widget . "\n"
 				. $image . "\n"
-				. $args['after_widget'] . "\n";
+				. $after_widget . "\n";
 		}
 	} # widget()
 	
@@ -100,12 +96,12 @@ class author_image {
 	 **/
 	
 	function get_single() {
-		$author_image = get_option('author_image_cache');
+		$author_image = get_transient('author_image_cache');
 		
 		if ( $author_image === '' ) {
 			return;
 		} elseif ( !is_dir(WP_CONTENT_DIR . '/authors') ) {
-			update_option('author_image_cache', '');
+			set_transient('author_image_cache', '');
 			return;
 		} elseif ( !$author_image ) {
 			global $wpdb;
@@ -121,12 +117,15 @@ class author_image {
 					JOIN	$wpdb->usermeta
 					ON		$wpdb->usermeta.user_id = $wpdb->users.ID
 					AND		$wpdb->usermeta.meta_key = '" . $wpdb->prefix . "capabilities'
+					JOIN	$wpdb->posts
+					ON		$wpdb->posts.post_author = $wpdb->users.ID
+					GROUP BY $wpdb->users.ID
 					ORDER BY $wpdb->users.ID
 					LIMIT $offset, $limit
 					");
 				
 				if ( !$authors ) {
-					update_option('author_image_cache', '');
+					set_transient('author_image_cache', '');
 					return;
 				}
 
@@ -147,7 +146,7 @@ class author_image {
 
 					if ( $author_image ) {
 						$author_image = basename($author_image);
-						update_option('author_image_cache', $author_image);
+						set_transient('author_image_cache', $author_image);
 						break;
 					}
 				}
@@ -156,16 +155,15 @@ class author_image {
 			} while ( !$author_image );
 			
 			if ( !$author_image ) {
-				update_option('author_image_cache', '');
+				set_transient('author_image_cache', '');
 				return;
 			}
 		}
 		
 		$author_image = content_url() . '/authors/' . $author_image;
-		$author_image = esc_url($author_image);
 		
 		return '<div class="entry_author_image">'
-			. '<img src="' . htmlspecialchars($author_image) . '" alt="" />'
+			. '<img src="' . esc_url($author_image) . '" alt="" />'
 			. '</div>' . "\n";
 	} # get_single()
 	
@@ -181,13 +179,11 @@ class author_image {
 			if ( in_the_loop() ) {
 				$author_id = get_the_author_id();
 			} elseif ( is_singular() ) {
-				global $wp_query;
-
-				if ( $wp_query->posts ) {
-					$author_id = $wp_query->posts[0]->post_author;
-					$user = wp_cache_get($author_id, 'users');
-					$author_login = $user->user_login;
-				}
+				global $wp_the_query;
+				
+				$author_id = $wp_the_query->posts[0]->post_author;
+				$user = get_userdata($author_id);
+				$author_login = $user->user_login;
 			} else {
 				return;
 			}
@@ -204,81 +200,64 @@ class author_image {
 		}
 		
 		$author_image = content_url() . '/authors/' . $author_image;
-		$author_image = esc_url($author_image);
 		
 		return '<div class="entry_author_image">'
-			. '<img src="' . htmlspecialchars($author_image) . '" alt="" />'
+			. '<img src="' . esc_url($author_image) . '" alt="" />'
 			. '</div>' . "\n";
 	} # get()
 	
 	
 	/**
-	 * get_options()
+	 * update()
 	 *
-	 * @return array $options
+	 * @param array $new_instance
+	 * @param array $old_instance
+	 * @return array $instance
 	 **/
-	
-	function get_options() {
-		if ( ( $o = get_option('author_image_widgets') ) === false ) {
-			$o = array();
-			
-			foreach ( array_keys( (array) $sidebars = get_option('sidebars_widgets') ) as $k ) {
-				if ( !is_array($sidebars[$k]) ) {
-					continue;
-				}
-				
-				if ( ( $key = array_search('sem-author-image', $sidebars[$k]) ) !== false ) {
-					$o[1] = author_image::default_options();
-					$sidebars[$k][$key] = 'author_image-1';
-					update_option('sidebars_widgets', $sidebars);
-					break;
-				} elseif ( ( $key = array_search('Author Image', $sidebars[$k]) ) !== false ) {
-					$o[1] = author_image::default_options();
-					$sidebars[$k][$key] = 'author_image-1';
-					update_option('sidebars_widgets', $sidebars);
-					break;
-				}
-			}
-			
-			update_option('author_image_widgets', $o);
-		}
+
+	function update($new_instance, $old_instance) {
+		$instance['always'] = isset($new_instance['always']);
 		
-		return $o;
-	} # get_options()
+		return $instance;
+	} # update()
 	
 	
 	/**
-	 * new_widget()
+	 * form()
 	 *
-	 * @return string $widget_id
+	 * @param array $instance
+	 * @return void
 	 **/
+
+	function form($instance) {
+		extract($instance, EXTR_SKIP);
 	
-	function new_widget($k = null) {
-		$o = author_image::get_options();
-		
-		if ( !( isset($k) && isset($o[$k]) ) ) {
-			$k = time();
-			while ( isset($o[$k]) ) $k++;
-			$o[$k] = author_image::default_options();
-			
-			update_option('author_image_widgets', $o);
-		}
-		
-		return 'author_image-' . $k;
-	} # new_widget()
+		echo '<p>'
+			. '<label>'
+			. '<input type="checkbox"'
+			. ' name="'. $this->get_field_name('always') . '"'
+			. checked($always, true, false)
+			. ' />'
+			. '&nbsp;' . __('This site has a single author.', 'sem-author-image')
+			. '</label>'
+			. '</p>' . "\n"
+			. '<p>'
+			. __('Normally, this widget will only output something when in the loop or on singular posts or pages. Check the above checkbox if a single author has an image.', 'sem-author-image')
+			. '</p>' . "\n";
+	} # form()
 	
 	
 	/**
-	 * default_options()
+	 * defaults()
 	 *
-	 * @return array $widget_options
+	 * @return array $instance
 	 **/
 	
-	function default_options() {
+	function defaults() {
 		return array(
 			'always' => false
 			);
-	} # default_options()
+	} # defaults()
 	
 	
 	/**
@@ -289,7 +268,7 @@ class author_image {
 	 **/
 
 	function get_meta($author_id) {
-		$user = wp_cache_get($author_id, 'users');
+		$user = get_userdata($author_id);
 		$author_login = $user->user_login;
 		
 		if ( defined('GLOB_BRACE') ) {
@@ -308,8 +287,8 @@ class author_image {
 		
 		if ( $author_image ) {
 			$author_image = basename($author_image);
-			if ( !get_option('author_image_cache') ) {
-				update_option('author_image_cache', $author_image);
+			if ( !get_transient('author_image_cache') ) {
+				set_transient('author_image_cache', $author_image);
 			}
 		} else {
 			$author_image = 0;
@@ -343,7 +322,7 @@ function author_image_admin() {
 	include dirname(__FILE__) . '/sem-author-image-admin.php';
 } # author_image_admin()
 
-foreach ( array('widgets', 'profile', 'user-edit') as $hook )
+foreach ( array('profile', 'user-edit') as $hook )
 	add_action("load-$hook.php", 'author_image_admin');
 
 
