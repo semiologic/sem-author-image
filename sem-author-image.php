@@ -71,6 +71,9 @@ class author_image extends WP_Widget {
 	 **/
 
 	function widget($args, $instance) {
+		if ( is_admin() )
+			return;
+		
 		extract($args, EXTR_SKIP);
 		$instance = wp_parse_args($instance, author_image::defaults());
 		extract($instance, EXTR_SKIP);
