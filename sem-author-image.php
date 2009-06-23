@@ -6,7 +6,7 @@ Description: Adds the authors images to your site, which individual users can co
 Version: 4.0 RC
 Author: Denis de Bernardy
 Author URI: http://www.getsemiologic.com
-Text Domain: sem-author-image-info
+Text Domain: sem-author-image
 Domain Path: /lang
 */
 
