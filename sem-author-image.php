@@ -22,6 +22,8 @@ http://www.opensource.org/licenses/gpl-2.0.php
 
 load_plugin_textdomain('sem-author-image', null, dirname(__FILE__) . '/lang');
 
+if ( !defined('sem_author_image_debug') )
+	define('sem_author_image_debug', false);
 
 /**
  * author_image
@@ -79,96 +81,101 @@ class author_image extends WP_Widget {
 		extract($instance, EXTR_SKIP);
 		
 		if ( $always ) {
-			$image = author_image::get_single();
-		} elseif ( in_the_loop() || is_singular() ) {
-			$image = author_image::get();
+			$author_id = author_image::get_single_id();
+		} elseif ( in_the_loop() ) {
+			$author_id = get_the_ID();
+		} elseif ( is_singular() ) {
+			global $wp_the_query;
+			$author_id = $wp_the_query->get_queried_object_id();
 		}
 		
-		if ( $image ) {
-			echo $before_widget . "\n"
-				. $image . "\n"
-				. $after_widget . "\n";
+		if ( $author_id ) {
+			$desc = $bio ? get_usermeta($author_id, 'description') : false;
+			$image = author_image::get($author_id);
+			
+			echo $before_widget . "\n";
+			
+			if ( $title )
+				echo $before_title . apply_filters('widget_title', $title) . $after_title;
+			
+			if ( in_the_loop() && $desc )
+				echo wpautop($desc);
+			
+			echo $image . "\n";
+			
+			if ( !in_the_loop() && $desc )
+				echo wpautop($desc);
+			
+			echo $after_widget . "\n";
 		}
 	} # widget()
 	
 	
 	/**
-	 * get_single()
+	 * get_single_id()
 	 *
-	 * @return string $image
+	 * @return int $author_id
 	 **/
 	
-	function get_single() {
-		$author_image = get_transient('author_image_cache');
+	function get_single_id() {
+		$author_id = get_transient('author_image_cache');
 		
-		if ( $author_image === '' ) {
-			return;
+		if ( $author_id && !sem_author_image_debug ) {
+			return $author_id;
+		} elseif ( $author_id === '' && !sem_author_image_debug ) {
+			return 0;
 		} elseif ( !is_dir(WP_CONTENT_DIR . '/authors') ) {
 			set_transient('author_image_cache', '');
-			return;
-		} elseif ( !$author_image ) {
-			global $wpdb;
-			$i = 0;
-			
-			do {
-				$offset = $i * 10;
-				$limit = ( $i + 1 ) * 10;
-				
-				$authors = $wpdb->get_col("
-					SELECT	$wpdb->users.user_login
-					FROM	$wpdb->users
-					JOIN	$wpdb->usermeta
-					ON		$wpdb->usermeta.user_id = $wpdb->users.ID
-					AND		$wpdb->usermeta.meta_key = '" . $wpdb->prefix . "capabilities'
-					JOIN	$wpdb->posts
-					ON		$wpdb->posts.post_author = $wpdb->users.ID
-					GROUP BY $wpdb->users.ID
-					ORDER BY $wpdb->users.ID
-					LIMIT $offset, $limit
-					");
-				
-				if ( !$authors ) {
-					set_transient('author_image_cache', '');
-					return;
-				}
-
-				foreach ( $authors as $author_id ) {
-					if ( defined('GLOB_BRACE') ) {
-						if ( $author_image = glob(WP_CONTENT_DIR . '/authors/' . $author_id . '{,-*}.{jpg,jpeg,png}', GLOB_BRACE) ) {
-							$author_image = current($author_image);
-						} else {
-							$author_image = false;
-						}
-					} else {
-						if ( $author_image = glob(WP_CONTENT_DIR . '/authors/' . $author_id . '-*.jpg') ) {
-							$author_image = current($author_image);
-						} else {
-							$author_image = false;
-						}
-					}
-
-					if ( $author_image ) {
-						$author_image = basename($author_image);
-						set_transient('author_image_cache', $author_image);
-						break;
-					}
-				}
-				
-				$i++;
-			} while ( !$author_image );
-			
-			if ( !$author_image ) {
-				set_transient('author_image_cache', '');
-				return;
-			}
+			return 0;
 		}
 		
-		$author_image = content_url() . '/authors/' . $author_image;
+		global $wpdb;
+		$author_id = 0;
+		$i = 0;
 		
-		return '<div class="entry_author_image">'
-			. '<img src="' . esc_url($author_image) . '" alt="" />'
-			. '</div>' . "\n";
-	} # get_single()
+		do {
+			$offset = $i * 10;
+			$limit = ( $i + 1 ) * 10;
+			
+			$authors = $wpdb->get_results("
+				SELECT	$wpdb->users.ID,
+						$wpdb->users.user_login
+				FROM	$wpdb->users
+				JOIN	$wpdb->usermeta
+				ON		$wpdb->usermeta.user_id = $wpdb->users.ID
+				AND		$wpdb->usermeta.meta_key = '" . $wpdb->prefix . "capabilities'
+				JOIN	$wpdb->posts
+				ON		$wpdb->posts.post_author = $wpdb->users.ID
+				GROUP BY $wpdb->users.ID
+				ORDER BY $wpdb->users.ID
+				LIMIT $offset, $limit
+				");
+			
+			if ( !$authors ) {
+				set_transient('author_image_cache', '');
+				return 0;
+			}
+
+			foreach ( $authors as $author ) {
+				if ( defined('GLOB_BRACE') ) {
+					$author_image = glob(WP_CONTENT_DIR . '/authors/' . $author->user_login . '{,-*}.{jpg,jpeg,png}', GLOB_BRACE);
+				} else {
+					$author_image = glob(WP_CONTENT_DIR . '/authors/' . $author->user_login . '-*.jpg');
+				}
+
+				if ( $author_image ) {
+					$author_id = $author->ID;
+					set_transient('author_image_cache', $author_id);
+					return $author_id;
+				}
+			}
+			
+			$i++;
+		} while ( !$author_id );
+		
+		set_transient('author_image_cache', '');
+		return 0;
+	} # get_single_id()
 	
 	
 	/**
@@ -219,6 +226,8 @@ class author_image extends WP_Widget {
 	 **/
 
 	function update($new_instance, $old_instance) {
+		$instance['title'] = strip_tags($new_instance['title']);
+		$instance['bio'] = isset($new_instance['bio']);
 		$instance['always'] = isset($new_instance['always']);
 		
 		return $instance;
@@ -237,11 +246,31 @@ class author_image extends WP_Widget {
 	
 		echo '<p>'
 			. '<label>'
+			. __('Title:', 'sem-author-image')
+			. '<input type="text" id="' . $this->get_field_name('title') . '" class="widefat"'
+			. ' name="'. $this->get_field_name('title') . '"'
+			. ' value="' . esc_attr($title) . '"'
+			. ' />'
+			. '</label>'
+			. '</p>' . "\n";
+	
+		echo '<p>'
+			. '<label>'
+			. '<input type="checkbox"'
+			. ' name="'. $this->get_field_name('bio') . '"'
+			. checked($bio, true, false)
+			. ' />'
+			. '&nbsp;' . __('Display the author\'s bio', 'sem-author-image')
+			. '</label>'
+			. '</p>' . "\n";
+		
+		echo '<p>'
+			. '<label>'
 			. '<input type="checkbox"'
 			. ' name="'. $this->get_field_name('always') . '"'
 			. checked($always, true, false)
 			. ' />'
-			. '&nbsp;' . __('This site has a single author.', 'sem-author-image')
+			. '&nbsp;' . __('This site has a single author', 'sem-author-image')
 			. '</label>'
 			. '</p>' . "\n"
 			. '<p>'
@@ -258,7 +287,21 @@ class author_image extends WP_Widget {
 	
 	function defaults() {
 		return array(
-			'always' => false
+			'title' => '',
+			'bio' => false,
+			'always' => false,
+			'widget_contexts' => array(
+				'home' => false,
+				'blog' => false,
+				'post' => true,
+				'page' => true,
+				'category' => false,
+				'tag' => false,
+				'author' => false,
+				'archive' => false,
+				'search' => false,
+				'404_error' => false,
+				),
 			);
 	} # defaults()
 	
