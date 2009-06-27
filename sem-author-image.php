@@ -34,7 +34,25 @@ if ( !defined('sem_author_image_debug') )
 add_action('widgets_init', array('author_image', 'widgets_init'));
 
 class author_image extends WP_Widget {
-	var $option_name = 'author_image_widgets';
+	/**
+	 * init()
+	 *
+	 * @return void
+	 **/
+
+	function init() {
+		if ( get_option('widget_bookmark_me') === false ) {
+			foreach ( array(
+				'author_image_widgets' => 'upgrade',
+				) as $ops => $method ) {
+				if ( get_option($ops) !== false ) {
+					$this->alt_option_name = $ops;
+					add_filter('option_' . $ops, array(get_class($this), $method));
+					break;
+				}
+			}
+		}
+	} # init()
 	
 	
 	/**
@@ -60,6 +78,7 @@ class author_image extends WP_Widget {
 			'description' => __("Displays the post author's image", 'sem-author-image'),
 			);
 		
+		$this->init();
 		$this->WP_Widget('author_image', __('Author Image', 'sem-author-image'), $widget_ops);
 	} # author_image()
 	
@@ -344,6 +363,28 @@ class author_image extends WP_Widget {
 		
 		return $author_image;
 	} # get_meta()
+	
+	
+	/**
+	 * upgrade()
+	 *
+	 * @param array $ops
+	 * @return array $ops
+	 **/
+
+	function upgrade($ops) {
+		$widget_contexts = class_exists('widget_contexts')
+			? get_option('widget_contexts')
+			: false;
+		
+		foreach ( $ops as $k => $o ) {
+			if ( isset($widget_contexts['author_image-' . $k]) ) {
+				$ops[$k]['widget_contexts'] = $widget_contexts['author_image-' . $k];
+			}
+		}
+		
+		return $ops;
+	} # upgrade()
 } # author_image
 
 
