@@ -112,10 +112,12 @@ class author_image extends WP_Widget {
 			$desc = $bio ? get_usermeta($author_id, 'description') : false;
 			$image = author_image::get($author_id);
 			
+			$title = apply_filters('widget_title', $title);
+			
 			echo $before_widget . "\n";
 			
 			if ( $title )
-				echo $before_title . apply_filters('widget_title', $title) . $after_title;
+				echo $before_title . $title . $after_title;
 			
 			if ( in_the_loop() && $desc )
 				echo wpautop($desc);
