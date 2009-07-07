@@ -41,7 +41,7 @@ class author_image extends WP_Widget {
 	 **/
 
 	function init() {
-		if ( get_option('widget_bookmark_me') === false ) {
+		if ( get_option('widget_author_image') === false ) {
 			foreach ( array(
 				'author_image_widgets' => 'upgrade',
 				) as $ops => $method ) {
