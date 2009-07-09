@@ -3,7 +3,7 @@ Contributors: Denis-de-Bernardy
 Donate link: http://buy.semiologic.com/drink
 Tags: author-image, semiologic
 Requires at least: 2.8
-Tested up to: 2.8
+Tested up to: 2.8.1
 Stable tag: trunk
 
 
@@ -21,6 +21,12 @@ Alternatively, place the following call in the loop where you want the author im
     <?php the_author_image(); ?>
 
 Lastly, browse Users / Your Profile in the admin area, upload an image file, and you're done.
+
+= Help Me! =
+
+The [Semiologic forum](http://forum.semiologic.com) is the best place to report issues. Please note, however, that while community members and I do our best to answer all queries, we're assisting you on a voluntary basis.
+
+If you require more dedicated assistance, consider using [Semiologic Pro](http://www.getsemiologic.com).
 
 
 == Installation ==
@@ -58,8 +64,11 @@ When displaying wide videos, images or tabular data, it becomes desirable to bum
 	<div style="clear:both;"></div>
 
 
-= Help Me! =
+== Change Log ==
 
-The [Semiologic forum](http://forum.semiologic.com) is the best place to report issues. Please note, however, that while community members and I do our best to answer all queries, we're assisting you on a voluntary basis.
+= 4.0 =
 
-If you require more dedicated assistance, consider using [Semiologic Pro](http://www.getsemiologic.com).
+- WP_Widget class
+- Add the author's bio after the image
+- Localization
+- Code enhancements and optimizations

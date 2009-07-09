@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.0\n"
 "Report-Msgid-Bugs-To: https://tickets.semiologic.com\n"
-"POT-Creation-Date: 2009-07-07 23:05+0200\n"
+"POT-Creation-Date: 2009-07-09 14:52+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,7 +21,8 @@ msgstr ""
 msgid "Author Images requires that your %s folder be writable by the server"
 msgstr ""
 
-#: sem-author-image-admin.php:37 sem-author-image.php:82
+#: sem-author-image-admin.php:37 sem-author-image-info.php:2
+#: sem-author-image.php:83
 msgid "Author Image"
 msgstr ""
 
@@ -37,35 +38,41 @@ msgstr ""
 msgid "New Image"
 msgstr ""
 
-#: sem-author-image-admin.php:81
+#: sem-author-image-admin.php:82
 msgid "(jpg, jpeg or png)"
 msgstr ""
 
-#: sem-author-image-admin.php:83
+#: sem-author-image-admin.php:84
 msgid "(jpg)"
 msgstr ""
 
-#: sem-author-image-admin.php:133
+#: sem-author-image-admin.php:134
 msgid "Invalid File Type."
 msgstr ""
 
-#: sem-author-image.php:78
+#: sem-author-image-info.php:3
+msgid ""
+"Adds authors images to your site, which individual users can configure in "
+"their profile. Your wp-content folder needs to be writable by the server."
+msgstr ""
+
+#: sem-author-image.php:79
 msgid "Displays the post author's image"
 msgstr ""
 
-#: sem-author-image.php:270
+#: sem-author-image.php:284
 msgid "Title:"
 msgstr ""
 
-#: sem-author-image.php:284
+#: sem-author-image.php:298
 msgid "Display the author's bio"
 msgstr ""
 
-#: sem-author-image.php:294
+#: sem-author-image.php:308
 msgid "This site has a single author"
 msgstr ""
 
-#: sem-author-image.php:298
+#: sem-author-image.php:312
 msgid ""
 "Normally, this widget will only output something when in the loop or on "
 "singular posts or pages. Check the above checkbox if a single author has an "

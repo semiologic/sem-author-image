@@ -2,8 +2,8 @@
 /*
 Plugin Name: Author Image
 Plugin URI: http://www.semiologic.com/software/author-image/
-Description: Adds the authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.
-Version: 4.0 RC
+Description: Adds authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.
+Version: 4.0 RC2
 Author: Denis de Bernardy
 Author URI: http://www.getsemiologic.com
 Text Domain: sem-author-image
@@ -24,6 +24,7 @@ load_plugin_textdomain('sem-author-image', null, dirname(__FILE__) . '/lang');
 
 if ( !defined('sem_author_image_debug') )
 	define('sem_author_image_debug', false);
+
 
 /**
  * author_image
@@ -102,33 +103,35 @@ class author_image extends WP_Widget {
 		if ( $always ) {
 			$author_id = author_image::get_single_id();
 		} elseif ( in_the_loop() ) {
-			$author_id = get_the_ID();
+			$author_id = get_the_author_ID();
 		} elseif ( is_singular() ) {
 			global $wp_the_query;
-			$author_id = $wp_the_query->get_queried_object_id();
+			$author_id = $wp_the_query->posts[0]->post_author;
 		}
 		
-		if ( $author_id ) {
-			$desc = $bio ? get_usermeta($author_id, 'description') : false;
-			$image = author_image::get($author_id);
-			
-			$title = apply_filters('widget_title', $title);
-			
-			echo $before_widget . "\n";
-			
-			if ( $title )
-				echo $before_title . $title . $after_title;
-			
-			if ( in_the_loop() && $desc )
-				echo wpautop($desc);
-			
-			echo $image . "\n";
-			
-			if ( !in_the_loop() && $desc )
-				echo wpautop($desc);
-			
-			echo $after_widget . "\n";
-		}
+		if ( !$author_id )
+			return;
+		
+		$image = author_image::get($author_id);
+		
+		if ( !$image )
+			return;
+		
+		$desc = $bio ? trim(get_usermeta($author_id, 'description')) : false;
+		
+		$title = apply_filters('widget_title', $title);
+		
+		echo $before_widget;
+		
+		if ( $title )
+			echo $before_title . $title . $after_title;
+		
+		echo $image . "\n";
+		
+		if ( $desc )
+			echo wpautop($desc);
+		
+		echo $after_widget;
 	} # widget()
 	
 	
@@ -148,6 +151,13 @@ class author_image extends WP_Widget {
 		} elseif ( !is_dir(WP_CONTENT_DIR . '/authors') ) {
 			set_transient('author_image_cache', '');
 			return 0;
+		}
+		
+		# try the site admin first
+		$user = get_user_by_email(get_option('admin_email'));
+		if ( $user && $user->ID && author_image::get($user->ID) ) {
+			set_transient('author_image_cache', $user->ID);
+			return $user->ID;
 		}
 		
 		global $wpdb;
@@ -176,7 +186,7 @@ class author_image extends WP_Widget {
 				set_transient('author_image_cache', '');
 				return 0;
 			}
-
+			
 			foreach ( $authors as $author ) {
 				if ( defined('GLOB_BRACE') ) {
 					$author_image = glob(WP_CONTENT_DIR . '/authors/' . $author->user_login . '{,-*}.{jpg,jpeg,png}', GLOB_BRACE);
@@ -185,6 +195,9 @@ class author_image extends WP_Widget {
 				}
 
 				if ( $author_image ) {
+					$user = new WP_User($author->ID);
+					if ( !$user->has_cap('publish_posts') && !$user->has_cap('publish_pages') )
+						continue;
 					$author_id = $author->ID;
 					set_transient('author_image_cache', $author_id);
 					return $author_id;
@@ -208,13 +221,12 @@ class author_image extends WP_Widget {
 	function get($author_id = null) {
 		if ( !$author_id ) {
 			if ( in_the_loop() ) {
-				$author_id = get_the_author_id();
+				$author_id = get_the_author_ID();
 			} elseif ( is_singular() ) {
 				global $wp_the_query;
 				
 				$author_id = $wp_the_query->posts[0]->post_author;
 				$user = get_userdata($author_id);
-				$author_login = $user->user_login;
 			} else {
 				return;
 			}
@@ -250,6 +262,8 @@ class author_image extends WP_Widget {
 		$instance['title'] = strip_tags($new_instance['title']);
 		$instance['bio'] = isset($new_instance['bio']);
 		$instance['always'] = isset($new_instance['always']);
+		
+		delete_transient('author_image_cache');
 		
 		return $instance;
 	} # update()
@@ -354,8 +368,11 @@ class author_image extends WP_Widget {
 		
 		if ( $author_image ) {
 			$author_image = basename($author_image);
+			
 			if ( !get_transient('author_image_cache') ) {
-				set_transient('author_image_cache', $author_image);
+				$user = new WP_User($author_id);
+				if ( $user->has_cap('publish_posts') || $user->has_cap('publish_pages') )
+					set_transient('author_image_cache', $author_id);
 			}
 		} else {
 			$author_image = 0;
@@ -393,11 +410,12 @@ class author_image extends WP_Widget {
 /**
  * the_author_image()
  *
+ * @param int $author_id
  * @return void
  **/
 
-function the_author_image($user_id = 0) {
-	echo author_image::get($user_id);
+function the_author_image($author_id = null) {
+	echo author_image::get($author_id);
 } # the_author_image()
 
 
@@ -410,9 +428,6 @@ function the_author_image($user_id = 0) {
 function author_image_admin() {
 	include dirname(__FILE__) . '/sem-author-image-admin.php';
 } # author_image_admin()
-
-foreach ( array('profile', 'user-edit') as $hook )
-	add_action("load-$hook.php", 'author_image_admin');
 
 
 /**
@@ -427,6 +442,8 @@ function load_multipart_user() {
 } # load_multipart_user()
 endif;
 
-foreach ( array('profile', 'user-edit') as $hook )
+foreach ( array('profile', 'user-edit') as $hook ) {
+	add_action("load-$hook.php", 'author_image_admin');
 	add_action("load-$hook.php", 'load_multipart_user');
+}
 ?>

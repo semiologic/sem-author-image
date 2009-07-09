@@ -73,9 +73,10 @@ class author_image_admin {
 				. '</th>'
 				. '<td>';
 			
-			echo '<input type="file" style="width: 480px;"'
+			echo '<input type="file"'
 				. ' id="author_image" name="author_image"'
-				. ' />';
+				. ' />'
+				. ' ';
 			
 			if ( defined('GLOB_BRACE') ) {
 				echo __('(jpg, jpeg or png)', 'sem-author-image') . "\n";
@@ -141,8 +142,8 @@ class author_image_admin {
 				$new_name = WP_CONTENT_DIR . '/authors/' . $author_login . '-' . $entropy . '.' . $ext;
 
 				// Set a maximum height and width
-				$width = 240;
-				$height = 240;
+				$width = 360;
+				$height = 360;
 
 				// Get new dimensions
 				list($width_orig, $height_orig) = getimagesize($tmp_name);
