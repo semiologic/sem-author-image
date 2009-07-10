@@ -20,7 +20,7 @@ http://www.opensource.org/licenses/gpl-2.0.php
 **/
 
 
-load_plugin_textdomain('sem-author-image', null, dirname(__FILE__) . '/lang');
+load_plugin_textdomain('sem-author-image', false, dirname(plugin_basename(__FILE__)) . '/lang');
 
 if ( !defined('sem_author_image_debug') )
 	define('sem_author_image_debug', false);
@@ -76,7 +76,7 @@ class author_image extends WP_Widget {
 	function author_image() {
 		$widget_ops = array(
 			'classname' => 'author_image',
-			'description' => __("Displays the post author's image", 'sem-author-image'),
+			'description' => __('Displays the post author\'s image', 'sem-author-image'),
 			);
 		
 		$this->init();
