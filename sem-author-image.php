@@ -129,7 +129,7 @@ class author_image extends WP_Widget {
 		echo $image . "\n";
 		
 		if ( $desc )
-			echo wpautop($desc);
+			echo wpautop(apply_filters('widget_text', $desc));
 		
 		echo $after_widget;
 	} # widget()
