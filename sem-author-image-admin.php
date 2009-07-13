@@ -99,6 +99,9 @@ class author_image_admin {
 	 **/
 	
 	function save_image($user_ID) {
+		if ( !$_POST )
+			return;
+		
 		if ( isset($_FILES['author_image']['name']) && $_FILES['author_image']['name'] ) {
 			$user = get_userdata($user_ID);
 			$author_login = $user->user_login;
