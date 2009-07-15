@@ -236,13 +236,11 @@ class author_image extends WP_Widget {
 		
 		$author_image = get_usermeta($author_id, 'author_image');
 		
-		if ( $author_image === '' ) {
+		if ( $author_image === '' )
 			$author_image = author_image::get_meta($author_id);
-		}
 		
-		if ( !$author_image ) {
+		if ( !$author_image )
 			return;
-		}
 		
 		$instance = wp_parse_args($instance, author_image::defaults());
 		extract($instance, EXTR_SKIP);
@@ -386,17 +384,15 @@ class author_image extends WP_Widget {
 		$author_login = $user->user_login;
 		
 		if ( defined('GLOB_BRACE') ) {
-			if ( $author_image = glob(WP_CONTENT_DIR . '/authors/' . $author_login . '{,-*}.{jpg,jpeg,png}', GLOB_BRACE) ) {
+			if ( $author_image = glob(WP_CONTENT_DIR . '/authors/' . $author_login . '{,-*}.{jpg,jpeg,png}', GLOB_BRACE) )
 				$author_image = current($author_image);
-			} else {
+			else
 				$author_image = false;
-			}
 		} else {
-			if ( $author_image = glob(WP_CONTENT_DIR . '/authors/' . $author_login . '-*.jpg') ) {
+			if ( $author_image = glob(WP_CONTENT_DIR . '/authors/' . $author_login . '-*.jpg') )
 				$author_image = current($author_image);
-			} else {
+			else
 				$author_image = false;
-			}
 		}
 		
 		if ( $author_image ) {
