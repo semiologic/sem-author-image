@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.0\n"
 "Report-Msgid-Bugs-To: https://tickets.semiologic.com\n"
-"POT-Creation-Date: 2009-07-15 10:30+0200\n"
+"POT-Creation-Date: 2009-07-15 10:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -60,23 +60,23 @@ msgstr ""
 msgid "Displays the post author's image"
 msgstr ""
 
-#: sem-author-image.php:306
+#: sem-author-image.php:304
 msgid "Title:"
 msgstr ""
 
-#: sem-author-image.php:320
+#: sem-author-image.php:318
 msgid "Display the author's bio"
 msgstr ""
 
-#: sem-author-image.php:330
+#: sem-author-image.php:328
 msgid "Link to the author's posts"
 msgstr ""
 
-#: sem-author-image.php:340
+#: sem-author-image.php:338
 msgid "This site has a single author"
 msgstr ""
 
-#: sem-author-image.php:344
+#: sem-author-image.php:342
 msgid ""
 "Normally, this widget will only output something when in the loop or on "
 "singular posts or pages. Check the above checkbox if a single author has an "
