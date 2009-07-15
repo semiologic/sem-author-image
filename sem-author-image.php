@@ -112,7 +112,7 @@ class author_image extends WP_Widget {
 		if ( !$author_id )
 			return;
 		
-		$image = author_image::get($author_id);
+		$image = author_image::get($author_id, $instance);
 		
 		if ( !$image )
 			return;
@@ -215,10 +215,12 @@ class author_image extends WP_Widget {
 	/**
 	 * get()
 	 *
+	 * @param bool $author_id
+	 * @param array $instance
 	 * @return string $image
 	 **/
 
-	function get($author_id = null) {
+	function get($author_id = null, $instance = null) {
 		if ( !$author_id ) {
 			if ( in_the_loop() ) {
 				$author_id = get_the_author_ID();
@@ -242,10 +244,29 @@ class author_image extends WP_Widget {
 			return;
 		}
 		
+		$instance = wp_parse_args($instance, author_image::defaults());
+		extract($instance, EXTR_SKIP);
+		
 		$author_image = content_url() . '/authors/' . $author_image;
+		$author_image = '<img src="' . esc_url($author_image) . '" alt="" />';
+		
+		if ( $link ) {
+			if ( !$always )
+				$author_link = get_author_posts_url($author_id);
+			elseif ( get_option('show_on_front') != 'page' || !get_option('page_on_front') )
+				$author_link = user_trailingslashit(get_option('home'));
+			elseif ( $post_id = get_option('page_for_posts') )
+				$author_link = apply_filters('the_permalink', get_permalink($post_id));
+			else
+				$author_link = user_trailingslashit(get_option('home'));
+			
+			$author_image = '<a href="' . esc_url($author_link) . '">'
+				. $author_image
+				. '</a>';
+		}
 		
 		return '<div class="entry_author_image">'
-			. '<img src="' . esc_url($author_image) . '" alt="" />'
+			. $author_image
 			. '</div>' . "\n";
 	} # get()
 	
@@ -261,6 +282,7 @@ class author_image extends WP_Widget {
 	function update($new_instance, $old_instance) {
 		$instance['title'] = strip_tags($new_instance['title']);
 		$instance['bio'] = isset($new_instance['bio']);
+		$instance['link'] = isset($new_instance['link']);
 		$instance['always'] = isset($new_instance['always']);
 		
 		delete_transient('author_image_cache');
@@ -298,6 +320,16 @@ class author_image extends WP_Widget {
 			. '&nbsp;' . __('Display the author\'s bio', 'sem-author-image')
 			. '</label>'
 			. '</p>' . "\n";
+	
+		echo '<p>'
+			. '<label>'
+			. '<input type="checkbox"'
+			. ' name="'. $this->get_field_name('link') . '"'
+			. checked($link, true, false)
+			. ' />'
+			. '&nbsp;' . __('Link to the author\'s posts', 'sem-author-image')
+			. '</label>'
+			. '</p>' . "\n";
 		
 		echo '<p>'
 			. '<label>'
@@ -324,6 +356,7 @@ class author_image extends WP_Widget {
 		return array(
 			'title' => '',
 			'bio' => false,
+			'link' => false,
 			'always' => false,
 			'widget_contexts' => array(
 				'home' => false,
@@ -411,11 +444,12 @@ class author_image extends WP_Widget {
  * the_author_image()
  *
  * @param int $author_id
+ * @param array $instance
  * @return void
  **/
 
-function the_author_image($author_id = null) {
-	echo author_image::get($author_id);
+function the_author_image($author_id = null, $instance = null) {
+	echo author_image::get($author_id, $instance);
 } # the_author_image()
 
 

@@ -69,6 +69,7 @@ When displaying wide videos, images or tabular data, it becomes desirable to bum
 = 4.0 =
 
 - WP_Widget class
-- Add the author's bio after the image
+- Allow to add the author's bio after the image
+- Allow to add a link to the author's posts on the image
 - Localization
 - Code enhancements and optimizations
