@@ -107,6 +107,11 @@ class author_image extends WP_Widget {
 		} elseif ( is_singular() ) {
 			global $wp_the_query;
 			$author_id = $wp_the_query->posts[0]->post_author;
+		} elseif ( is_author() ) {
+			global $wp_the_query;
+			$author_id = $wp_the_query->get_queried_object_id();
+		} else {
+			return;
 		}
 		
 		if ( !$author_id )
@@ -226,9 +231,10 @@ class author_image extends WP_Widget {
 				$author_id = get_the_author_ID();
 			} elseif ( is_singular() ) {
 				global $wp_the_query;
-				
 				$author_id = $wp_the_query->posts[0]->post_author;
-				$user = get_userdata($author_id);
+			} elseif ( is_author() ) {
+				global $wp_the_query;
+				$author_id = $wp_the_query->get_queried_object_id();
 			} else {
 				return;
 			}
