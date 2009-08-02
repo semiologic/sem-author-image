@@ -5,10 +5,6 @@
  * @package Author Image
  **/
 
-add_action('edit_user_profile', array('author_image_admin', 'edit_image'));
-add_action('show_user_profile', array('author_image_admin', 'edit_image'));
-add_action('profile_update', array('author_image_admin', 'save_image'));
-
 class author_image_admin {
 	/**
 	 * edit_image()
@@ -210,4 +206,8 @@ class author_image_admin {
 		return $user_ID;
 	} # save_image()
 } # author_image_admin
+
+add_action('edit_user_profile', array('author_image_admin', 'edit_image'));
+add_action('show_user_profile', array('author_image_admin', 'edit_image'));
+add_action('profile_update', array('author_image_admin', 'save_image'));
 ?>

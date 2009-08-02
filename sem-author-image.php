@@ -32,8 +32,6 @@ if ( !defined('sem_author_image_debug') )
  * @package Author Image
  **/
 
-add_action('widgets_init', array('author_image', 'widgets_init'));
-
 class author_image extends WP_Widget {
 	/**
 	 * init()
@@ -466,12 +464,6 @@ function author_image_admin() {
 } # author_image_admin()
 
 
-/**
- * load_multipart_user()
- *
- * @return @void
- **/
-
 if ( !function_exists('load_multipart_user') ) :
 function load_multipart_user() {
 	include dirname(__FILE__) . '/multipart-user/multipart-user.php';
@@ -482,4 +474,7 @@ foreach ( array('profile', 'user-edit') as $hook ) {
 	add_action("load-$hook.php", 'author_image_admin');
 	add_action("load-$hook.php", 'load_multipart_user');
 }
+
+
+add_action('widgets_init', array('author_image', 'widgets_init'));
 ?>
