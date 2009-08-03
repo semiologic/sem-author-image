@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.0\n"
 "Report-Msgid-Bugs-To: https://tickets.semiologic.com\n"
-"POT-Creation-Date: 2009-07-17 01:10+0200\n"
+"POT-Creation-Date: 2009-08-03 18:31+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,37 +16,37 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: sem-author-image-admin.php:23 sem-author-image-admin.php:30
+#: sem-author-image-admin.php:19 sem-author-image-admin.php:26
 #, php-format
 msgid "Author Images requires that your %s folder be writable by the server"
 msgstr ""
 
-#: sem-author-image-admin.php:37 sem-author-image-info.php:2
-#: sem-author-image.php:83
+#: sem-author-image-admin.php:33 sem-author-image-info.php:2
+#: sem-author-image.php:81
 msgid "Author Image"
 msgstr ""
 
-#: sem-author-image-admin.php:60
+#: sem-author-image-admin.php:56
 msgid "Delete author image"
 msgstr ""
 
-#: sem-author-image-admin.php:63
+#: sem-author-image-admin.php:59
 msgid "This author image is not writable by the server."
 msgstr ""
 
-#: sem-author-image-admin.php:72
+#: sem-author-image-admin.php:68
 msgid "New Image"
 msgstr ""
 
-#: sem-author-image-admin.php:82
+#: sem-author-image-admin.php:78
 msgid "(jpg, jpeg or png)"
 msgstr ""
 
-#: sem-author-image-admin.php:84
+#: sem-author-image-admin.php:80
 msgid "(jpg)"
 msgstr ""
 
-#: sem-author-image-admin.php:137
+#: sem-author-image-admin.php:133
 msgid "Invalid File Type."
 msgstr ""
 
@@ -56,27 +56,27 @@ msgid ""
 "their profile. Your wp-content folder needs to be writable by the server."
 msgstr ""
 
-#: sem-author-image.php:79
+#: sem-author-image.php:77
 msgid "Displays the post author's image"
 msgstr ""
 
-#: sem-author-image.php:310
+#: sem-author-image.php:308
 msgid "Title:"
 msgstr ""
 
-#: sem-author-image.php:324
+#: sem-author-image.php:322
 msgid "Display the author's bio"
 msgstr ""
 
-#: sem-author-image.php:334
+#: sem-author-image.php:332
 msgid "Link to the author's posts"
 msgstr ""
 
-#: sem-author-image.php:344
+#: sem-author-image.php:342
 msgid "This site has a single author"
 msgstr ""
 
-#: sem-author-image.php:348
+#: sem-author-image.php:346
 msgid ""
 "Normally, this widget will only output something when in the loop or on "
 "singular posts or pages. Check the above checkbox if a single author has an "
