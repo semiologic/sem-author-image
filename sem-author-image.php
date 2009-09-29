@@ -249,7 +249,7 @@ class author_image extends WP_Widget {
 		$instance = wp_parse_args($instance, author_image::defaults());
 		extract($instance, EXTR_SKIP);
 		
-		$author_image = content_url() . '/authors/' . $author_image;
+		$author_image = content_url() . '/authors/' . str_replace(' ', rawurlencode(' '), $author_image);
 		$author_image = '<img src="' . esc_url($author_image) . '" alt="" />';
 		
 		if ( $link ) {
@@ -393,7 +393,7 @@ class author_image extends WP_Widget {
 		
 		if ( $author_image ) {
 			$author_image = basename($author_image);
-			$author_image = str_replace(' ', rawurlencode(' '), $author_image);
+			
 			if ( !get_transient('author_image_cache') ) {
 				$user = new WP_User($author_id);
 				if ( $user->has_cap('publish_posts') || $user->has_cap('publish_pages') )

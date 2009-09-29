@@ -37,7 +37,7 @@ class author_image_admin {
 		$author_id = $profileuser->ID;
 		
 		$author_image = author_image::get_meta($author_id);
-		$author_image_url = content_url() . '/authors/' . $author_image;
+		$author_image_url = content_url() . '/authors/' . str_replace(' ', rawurlencode(' '), $author_image);
 		
 		echo '<table class="form-table">';
 		
