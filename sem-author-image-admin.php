@@ -174,9 +174,6 @@ class author_image_admin {
 				$perms = $stat['mode'] & 0000666;
 				@chmod($new_name, $perms);
 			}
-			
-			delete_transient('author_image_cache');
-			delete_usermeta($user_ID, 'author_image_cache');
 		} elseif ( isset($_POST['delete_author_image']) ) {
 			$user = get_userdata($user_ID);
 			$author_login = $user->user_login;
@@ -198,11 +195,11 @@ class author_image_admin {
 					}
 				}
 			}
-			
-			delete_transient('author_image_cache');
-			delete_usermeta($user_ID, 'author_image_cache');
 		}
 
+		delete_transient('author_image_cache');
+		delete_usermeta($user_ID, 'author_image_cache');
+		
 		return $user_ID;
 	} # save_image()
 } # author_image_admin
