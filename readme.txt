@@ -3,7 +3,7 @@ Contributors: Denis-de-Bernardy
 Donate link: http://www.semiologic.com/partners/
 Tags: author-image, semiologic
 Requires at least: 2.8
-Tested up to: 2.8.6
+Tested up to: 2.9
 Stable tag: trunk
 
 
