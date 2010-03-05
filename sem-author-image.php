@@ -301,6 +301,7 @@ class author_image extends WP_Widget {
 	 **/
 
 	function form($instance) {
+		$instance = wp_parse_args($instance, author_image::defaults());
 		extract($instance, EXTR_SKIP);
 	
 		echo '<p>'
