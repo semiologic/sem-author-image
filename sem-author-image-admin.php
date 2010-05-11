@@ -135,8 +135,8 @@ class author_image_admin {
 					. "</p>\n"
 					. "</div>\n";
 			} else {
-				$entropy = intval(get_option('sem_entropy')) + 1;
-				update_option('sem_entropy', $entropy);
+				$entropy = intval(get_site_option('sem_entropy')) + 1;
+				update_site_option('sem_entropy', $entropy);
 
 				$new_name = WP_CONTENT_DIR . '/authors/' . $author_login . '-' . $entropy . '.' . $ext;
 
