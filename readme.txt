@@ -81,6 +81,10 @@ When displaying wide videos, images or tabular data, it becomes desirable to bum
 
 == Change Log ==
 
+= 4.0.3 =
+
+- WP 3.0.1 compat
+
 = 4.0.2 =
 
 - WP 3.0 compat
