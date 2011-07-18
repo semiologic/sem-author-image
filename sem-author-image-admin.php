@@ -141,8 +141,8 @@ class author_image_admin {
 				$new_name = WP_CONTENT_DIR . '/authors/' . $author_login . '-' . $entropy . '.' . $ext;
 
 				// Set a maximum height and width
-				$width = 360;
-				$height = 360;
+				$width = SEM_AUTHOR_IMAGE_WIDTH;
+				$height = SEM_AUTHOR_IMAGE_HEIGHT;
 
 				// Get new dimensions
 				list($width_orig, $height_orig) = getimagesize($tmp_name);

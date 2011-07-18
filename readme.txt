@@ -78,8 +78,19 @@ When displaying wide videos, images or tabular data, it becomes desirable to bum
 
 	<div style="clear:both;"></div>
 
+= Overriding the max width/height =
+
+This can be done by setting two constants in your `wp-config.php` file:
+
+	define('SEM_AUTHOR_IMAGE_WIDTH', 360);
+	define('SEM_AUTHOR_IMAGE_HEIGHT', 360);
+
 
 == Change Log ==
+
+= 4.0.4 =
+
+- Add two defines, `SEM_AUTHOR_IMAGE_WIDTH` and `SEM_AUTHOR_IMAGE_HEIGHT`, to control the max height/width from the `wp-config.php` file.
 
 = 4.0.3 =
 
