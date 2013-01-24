@@ -1,0 +1,3 @@
+[submodule "multipart-user"]
+	path = multipart-user
+	url = ssh://git@roundtopsolutions.com/home/git/semiologic/lib/multipart-user

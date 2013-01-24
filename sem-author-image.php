@@ -3,8 +3,8 @@
 Plugin Name: Author Image
 Plugin URI: http://www.semiologic.com/software/author-image/
 Description: Adds authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.
-Version: 4.0.4
-Author: Denis de Bernardy
+Version: 4.1
+Author: Denis de Bernardy & Mike Koepke
 Author URI: http://www.getsemiologic.com
 Text Domain: sem-author-image
 Domain Path: /lang
@@ -107,7 +107,7 @@ class author_image extends WP_Widget {
 		if ( $always ) {
 			$author_id = author_image::get_single_id();
 		} elseif ( in_the_loop() ) {
-			$author_id = get_the_author_ID();
+			$author_id = get_the_author_meta('ID');
 		} elseif ( is_singular() ) {
 			global $wp_the_query;
 			$author_id = $wp_the_query->posts[0]->post_author;
@@ -126,7 +126,7 @@ class author_image extends WP_Widget {
 		if ( !$image )
 			return;
 		
-		$desc = $bio ? trim(get_usermeta($author_id, 'description')) : false;
+		$desc = $bio ? trim(get_user_meta($author_id, 'description', true)) : false;
 		
 		$title = apply_filters('widget_title', $title);
 		
@@ -163,7 +163,7 @@ class author_image extends WP_Widget {
 		}
 		
 		# try the site admin first
-		$user = get_user_by_email(get_option('admin_email'));
+		$user = get_user_by('email', get_option('admin_email'));
 		if ( $user && $user->ID && author_image::get($user->ID) ) {
 			set_transient('author_image_cache', $user->ID);
 			return $user->ID;
@@ -232,7 +232,7 @@ class author_image extends WP_Widget {
 	function get($author_id = null, $instance = null) {
 		if ( !$author_id ) {
 			if ( in_the_loop() ) {
-				$author_id = get_the_author_ID();
+				$author_id = get_the_author_meta('ID');
 			} elseif ( is_singular() ) {
 				global $wp_the_query;
 				$author_id = $wp_the_query->posts[0]->post_author;
@@ -240,17 +240,17 @@ class author_image extends WP_Widget {
 				global $wp_the_query;
 				$author_id = $wp_the_query->get_queried_object_id();
 			} else {
-				return;
+				return "";
 			}
 		}
 		
-		$author_image = get_usermeta($author_id, 'author_image');
+		$author_image = get_user_meta($author_id, 'author_image', true);
 		
 		if ( $author_image === '' )
 			$author_image = author_image::get_meta($author_id);
 		
 		if ( !$author_image )
-			return;
+			return "";
 		
 		$instance = wp_parse_args($instance, author_image::defaults());
 		extract($instance, EXTR_SKIP);
@@ -410,7 +410,7 @@ class author_image extends WP_Widget {
 			$author_image = 0;
 		}
 		
-		update_usermeta($author_id, 'author_image', $author_image);
+		update_user_meta($author_id, 'author_image', $author_image);
 		
 		return $author_image;
 	} # get_meta()

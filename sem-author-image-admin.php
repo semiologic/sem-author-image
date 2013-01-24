@@ -198,7 +198,7 @@ class author_image_admin {
 		}
 
 		delete_transient('author_image_cache');
-		delete_usermeta($user_ID, 'author_image_cache');
+		delete_user_meta($user_ID, 'author_image_cache');
 		
 		return $user_ID;
 	} # save_image()

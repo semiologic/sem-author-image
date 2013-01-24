@@ -1,9 +1,9 @@
 === Author Image ===
-Contributors: Denis-de-Bernardy
+Contributors: Denis-de-Bernardy & Mike Koepke
 Donate link: http://www.semiologic.com/partners/
 Tags: author-image, semiologic
-Requires at least: 2.8
-Tested up to: 3.2.1
+Requires at least: 3.1
+Tested up to: 3.5
 Stable tag: trunk
 
 
@@ -87,6 +87,10 @@ This can be done by setting two constants in your `wp-config.php` file:
 
 
 == Change Log ==
+
+= 4.1 =
+
+- Fix deprecated functions
 
 = 4.0.4 =
 
