@@ -48,8 +48,8 @@ If you require more dedicated assistance, consider using [Semiologic Pro](http:/
 == Installation ==
 
 1. Upload the plugin folder to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Make the `wp-content` folder writable by your server (chmod 777)
+2. Activate the plugin through the 'Plugins' menu in WordPress
+3. Make the `wp-content` folder writable by your server (chmod 777)
 
 
 == Screenshots ==
@@ -87,6 +87,10 @@ This can be done by setting two constants in your `wp-config.php` file:
 
 
 == Change Log ==
+
+= 4.1.1 =
+
+- Removed non-static function warning
 
 = 4.1 =
 
