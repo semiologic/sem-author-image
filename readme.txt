@@ -1,11 +1,12 @@
 === Author Image ===
-Contributors: Denis-de-Bernardy & Mike Koepke
+Contributors: Denis-de-Bernardy, Mike_Koepke
 Donate link: http://www.semiologic.com/partners/
 Tags: author-image, semiologic
 Requires at least: 3.1
-Tested up to: 3.5
+Tested up to: 3.5.1
 Stable tag: trunk
-
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Lets you easily add author images on your site.
 
@@ -94,7 +95,7 @@ This can be done by setting two constants in your `wp-config.php` file:
 
 = 4.1 =
 
-- Fix deprecated functions
+- Fix deprecated functions that caused the plugin to break with WP 3.5
 
 = 4.0.4 =
 
