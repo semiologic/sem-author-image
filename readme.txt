@@ -89,6 +89,10 @@ This can be done by setting two constants in your `wp-config.php` file:
 
 == Change Log ==
 
+= 4.2 =
+
+- <img> alt field now set with author display name
+
 = 4.1.1 =
 
 - Removed non-static function warning
