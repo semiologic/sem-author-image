@@ -6,7 +6,16 @@
  **/
 
 class author_image_admin {
-	/**
+    /**
+     * author_image_admin()
+     */
+    function author_image_admin() {
+        add_action('edit_user_profile', array($this, 'edit_image'));
+        add_action('show_user_profile', array($this, 'edit_image'));
+        add_action('profile_update', array($this, 'save_image'));
+    }
+
+    /**
 	 * edit_image()
 	 *
 	 * @return void
@@ -83,20 +92,29 @@ class author_image_admin {
 			echo '</td>'
 				. '</tr>' . "\n";
 		}
-		
+
+        echo '<tr>'
+      		. '<th><label for="sem_aboutme_page">About Me Page</label></th>'
+      		. '<td>'
+      		. '<input type="text" name="sem_aboutme_page" id="sem_aboutme_page" value="' . esc_attr( get_the_author_meta( 'sem_aboutme_page', $author_id ) ) .'" class="regular-text" /><br />'
+      	    . '<span class="description">Please enter an alternate About Me page for the image' . "'s url.</span>"
+      		. '</td>'
+      		. '</tr>';
+
 		echo '</table>' . "\n";
 	} # edit_image()
-	
-	
-	/**
-	 * save_image()
-	 *
-	 * @return void
-	 **/
+
+
+    /**
+     * save_image()
+     *
+     * @param $user_ID
+     * @return mixed
+     */
 	
 	function save_image($user_ID) {
-		if ( !$_POST )
-			return;
+		if ( !$_POST || !current_user_can( 'edit_user', $user_ID ))
+			return false;
 		
 		if ( isset($_FILES['author_image']['name']) && $_FILES['author_image']['name'] ) {
 			$user = get_userdata($user_ID);
@@ -199,12 +217,13 @@ class author_image_admin {
 
 		delete_transient('author_image_cache');
 		delete_user_meta($user_ID, 'author_image_cache');
+
+	    update_user_meta( $user_ID, 'sem_aboutme_page', $_POST['sem_aboutme_page'] );
 		
 		return $user_ID;
 	} # save_image()
 } # author_image_admin
 
-add_action('edit_user_profile', array('author_image_admin', 'edit_image'));
-add_action('show_user_profile', array('author_image_admin', 'edit_image'));
-add_action('profile_update', array('author_image_admin', 'save_image'));
+
+$author_image_admin = new author_image_admin();
 ?>

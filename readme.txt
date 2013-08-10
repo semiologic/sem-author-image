@@ -3,7 +3,7 @@ Contributors: Denis-de-Bernardy, Mike_Koepke
 Donate link: http://www.semiologic.com/partners/
 Tags: author-image, semiologic
 Requires at least: 3.1
-Tested up to: 3.5.1
+Tested up to: 3.6
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -29,15 +29,25 @@ You can configure the widget so it outputs the author's description in addition 
 
 This fits well on a site where the author's image is placed in a sidebar, or the [Semiologic theme](http://www.semiologic.com/software/sem-reloaded/) when the widget is placed immediately after the posts' content -- i.e. "About The Author."
 
+= Gravatar Support =
+
+The uploaded image will be used as your gravatar by themes that call the get_avatar() function.  This will override an image set on gravatar.com
+
 = Multi-Author Sites =
 
 For sites with multitudes of authors, the widget offers the ability to insert a link to the author's posts -- his archives.
 
 = Single Author Sites =
 
-Normally, the widget will only display an author image when it can clearly identify who the content's author actually is. In other words, on singular pages or in the loop.
+Normally the widget will only display an author image when it can clearly identify who the content's author actually is. In other words, on singular pages or in the loop.
 
 If you run a single author site, or a site with multiple ghost writers, be sure to check the "This site has a single author" option. The widget will then output your image at all times.
+
+= Alternate About Page Link =
+
+Normally the widget will use the author's posts page (/author/authorname/) is the image is clicked on.   If your site has a dedicated page for the author, such as an 'About Me' page,
+
+there is a new field in 'Your Profile' called 'About Me Page'.  Entering a url in this field (/about-me/) will cause the widget to use this link as opposed to /author/authorname.
 
 = Help Me! =
 
@@ -88,6 +98,13 @@ This can be done by setting two constants in your `wp-config.php` file:
 
 
 == Change Log ==
+
+= 4.3 =
+
+- Added ability to set link to alternate page if image is clicked on.
+- Your author's image will also be served as your gravatar/avatar on the site for themes that call get_avatar for the post author or in comments.
+- WP 3.6 compat
+- PHP 5.4 Strict compat
 
 = 4.2 =
 
