@@ -3,7 +3,7 @@
 Plugin Name: Author Image
 Plugin URI: http://www.semiologic.com/software/author-image/
 Description: Adds authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.
-Version: 4.3
+Version: 4.4
 Author: Denis de Bernardy & Mike Koepke
 Author URI: http://www.getsemiologic.com
 Text Domain: sem-author-image
@@ -14,9 +14,8 @@ Domain Path: /lang
 Terms of use
 ------------
 
-This software is copyright Mesoconcepts (http://www.mesoconcepts.com), and is distributed under the terms of the GPL license, v.2.
-
-http://www.opensource.org/licenses/gpl-2.0.php
+This software is copyright Mike Koepke, released under the GPL v2 or later. (http://www.opensource.org/licenses/gpl-2.0.php)
+Based on code (c) Denis de Bernardy, released under the MIT license.
 **/
 
 
@@ -48,7 +47,7 @@ class author_image extends WP_Widget {
 
    	function author_image() {
 
-        add_action('widgets_init', array($this, 'widgets_init'));
+        add_action( 'widgets_init', array($this, 'widgets_init') );
 
    		$widget_ops = array(
    			'classname' => 'author_image',
@@ -125,7 +124,7 @@ class author_image extends WP_Widget {
 		if ( !$author_id )
 			return;
 		
-		$image = author_image::get($author_id, $instance);
+		$image = author_image::get($author_id, $instance, $width, $height);
 		
 		if ( !$image )
 			return;
@@ -223,17 +222,19 @@ class author_image extends WP_Widget {
 		set_transient('author_image_cache', '');
 		return 0;
 	} # get_single_id()
-	
-	
+
+
 	/**
 	 * get()
 	 *
 	 * @param bool $author_id
 	 * @param array $instance
+	 * @param int $width
+	 * @param int $height
 	 * @return string $image
-	 **/
+	 */
 
-	function get($author_id = null, $instance = null) {
+	function get($author_id = null, $instance = null, $width = null, $height = null) {
 		if ( !$author_id ) {
 			if ( in_the_loop() ) {
 				$author_id = get_the_author_meta('ID');
@@ -248,7 +249,7 @@ class author_image extends WP_Widget {
 			}
 		}
 
-        $author_image = author_image::get_author_image($author_id);
+        $author_image = author_image::get_author_image($author_id, $width, $height);
 
         $instance = wp_parse_args($instance, author_image::defaults());
      	extract($instance, EXTR_SKIP);
@@ -280,11 +281,12 @@ class author_image extends WP_Widget {
      * get_author_image()
      *
      * @param int $author_id
-     * @param null $size
+     * @param null $width
+     * @param null $height
      * @return string $image
      */
 
-   	function get_author_image($author_id, $size = null) {
+   	function get_author_image($author_id, $width = null, $height = null) {
 
    		$author_image = get_user_meta($author_id, 'author_image', true);
 
@@ -298,13 +300,16 @@ class author_image extends WP_Widget {
 
    		$author_image = content_url() . '/authors/' . str_replace(' ', rawurlencode(' '), $author_image);
 
-        if ($size) {
+        if ( !empty($width) ) {
+	        if ( empty ($height) )
+		        $height = $width;
+	            $author_image = '<img src="' . esc_url($author_image) . '" alt="' . $author_name
+	               . '" width="'. $width . '" height="' . $height . '" />';
+        }
+	    else {
    		    $author_image = '<img src="' . esc_url($author_image) . '" alt="' . $author_name
-            . '" width="'. $size . '" height="' . $size . '" />';
-        }
-        else {
-            $author_image = '<img src="' . esc_url($author_image) . '" alt="' . $author_name . '" />';
-        }
+                . '" />';
+	    }
 
         return $author_image;
     } #get_author_image()
@@ -322,7 +327,9 @@ class author_image extends WP_Widget {
 		$instance['bio'] = isset($new_instance['bio']);
 		$instance['link'] = isset($new_instance['link']);
 		$instance['always'] = isset($new_instance['always']);
-		
+		$instance['width'] = min(max((int) $new_instance['width'], 0), 400);
+		$instance['height'] = min(max((int) $new_instance['height'], 0), 400);
+
 		delete_transient('author_image_cache');
 		
 		return $instance;
@@ -352,6 +359,26 @@ class author_image extends WP_Widget {
 	
 		echo '<p>'
 			. '<label>'
+			. __('Width: ', 'sem-author-image')
+			. '<input type="text" size="4" name="' . $this->get_field_name('width') . '"'
+			. ' value="' . intval($width) . '"'
+			. ' />'
+			. '</label>'
+			. "\n";
+
+		echo '<label>'
+			. __('Height: ', 'sem-author-image')
+			. '<input type="text" size="4" name="' . $this->get_field_name('height') . '"'
+			. ' value="' . intval($height) . '"'
+			. ' />'
+			. '</label>'
+			. '</p>' . "\n"
+			. '<p><i>'
+			. __('Leave width and height at 0 to use dimensions from the uploaded image itself.', 'sem-author-image')
+			. '</i></p>' . "\n";
+
+		echo '<p>'
+			. '<label>'
 			. '<input type="checkbox"'
 			. ' name="'. $this->get_field_name('bio') . '"'
 			. checked($bio, true, false)
@@ -379,9 +406,9 @@ class author_image extends WP_Widget {
 			. '&nbsp;' . __('This site has a single author', 'sem-author-image')
 			. '</label>'
 			. '</p>' . "\n"
-			. '<p>'
+			. '<p><i>'
 			. __('Normally, this widget will only output something when in the loop or on singular posts or pages. Check the above checkbox if a single author has an image.', 'sem-author-image')
-			. '</p>' . "\n";
+			. '</i></p>' . "\n";
 	} # form()
 	
 	
@@ -401,6 +428,8 @@ class author_image extends WP_Widget {
             'search' => false,
             '404_error' => false,
             ),
+			'width' => 0,
+			'height' => 0,
         );
 	} # defaults()
 	
@@ -487,16 +516,29 @@ class author_image extends WP_Widget {
  * the_author_image()
  *
  * @param int $author_id
- * @param array $instance
  * @return void
- **/
+ */
 
-function the_author_image($author_id = null, $instance = null) {
+function the_author_image($author_id = null) {
     global $author_image;
 
-	echo $author_image->get($author_id, $instance);
+	echo $author_image->get($author_id, null);
 } # the_author_image()
 
+/**
+ * the_author_image_size()
+ *
+ * @param int $width
+ * @param int $height
+ * @param null $author_id
+ * @return void
+ */
+
+function the_author_image_size($width, $height, $author_id = null) {
+    global $author_image;
+
+	echo $author_image->get($author_id, null, $width, $height);
+} # the_author_image()
 
 /**
  * author_image_admin()
@@ -519,7 +561,10 @@ foreach ( array('profile', 'user-edit') as $hook ) {
 	add_action("load-$hook.php", 'author_image_admin');
 	add_action("load-$hook.php", 'load_multipart_user');
 }
+
 $author_image = new author_image();
+
+
 
 if ( !function_exists( 'get_avatar' ) ) :
 /**

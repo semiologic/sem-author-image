@@ -1,7 +1,6 @@
 === Author Image ===
 Contributors: Denis-de-Bernardy, Mike_Koepke
-Donate link: http://www.semiologic.com/partners/
-Tags: author-image, semiologic
+Tags: author-image, author, semiologic
 Requires at least: 3.1
 Tested up to: 3.6
 Stable tag: trunk
@@ -13,15 +12,29 @@ Lets you easily add author images on your site.
 
 == Description ==
 
-The author image plugin for WordPress lets you easily add author images on your site.
+The Author Image plugin for WordPress lets you easily add author images on your site.
 
 It creates a widget that you can insert in a sidebar, or much about anywhere if using the [Semiologic theme](http://www.semiologic.com/software/sem-reloaded/).
 
-Alternatively, place the following call in the loop where you want the author image to appear:
+Alternatively, you can place the following call in the loop where you want the author image to appear:
 
-    <?php the_author_image(); ?>
+    <?php the_author_image($author_id = null); ?>
+
+	This $author_id parameter is optional.  If it is not passed in, the code will attempt to get the current author of the page/post.
+
+A second version of this function exists whereby you can pass in width and height to display the image.
+
+    <?php the_author_image($width, $height, $author_id = null); ?>
+
+	This $author_id parameter is optional.  If it is not passed in, the code will attempt to get the current author of the page/post.
 
 To configure your author image, browse Users / Your Profile in the admin area.
+
+= Setting Author Image Size =
+
+You can adjust the actual display size in the Author Image widget or by using the_author_image_size function call.
+
+If you do not specify a size the width and height of the actual image will be used.
 
 = Author's Bio =
 
@@ -82,22 +95,32 @@ For instance:
       margin: 1.2em 1.2em 0px .1em;
     }
 
-
 = Overriding CSS Floats =
 
 When displaying wide videos, images or tabular data, it becomes desirable to bump the content below the author's image. To achieve this, insert the following code in your post:
 
 	<div style="clear:both;"></div>
 
-= Overriding the max width/height =
+= Set Uploaded Image Max Width and Height =
 
-This can be done by setting two constants in your `wp-config.php` file:
+Two constants can be set in your `wp-config.php` file to set the max size of the uploaded image.  These values are in pixels.
 
-	define('SEM_AUTHOR_IMAGE_WIDTH', 360);
-	define('SEM_AUTHOR_IMAGE_HEIGHT', 360);
+	define('SEM_AUTHOR_IMAGE_WIDTH', 100);
+	define('SEM_AUTHOR_IMAGE_HEIGHT', 120);
+
+The default values for these settings are 250 x 250.
+
+= Nothing is Displaying =
+
+More than likely you have place the the_author_image function call outside of your template's posts loop so the author cannot be determined.  Trying passing in an author id directly.
 
 
 == Change Log ==
+
+= 4.4 =
+
+- Added ability to specify a width and height in the widget
+- Added new the_author_image_size function
 
 = 4.3 =
 
