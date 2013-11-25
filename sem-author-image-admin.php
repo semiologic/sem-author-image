@@ -7,9 +7,9 @@
 
 class author_image_admin {
     /**
-     * author_image_admin()
+     * constructor
      */
-    function author_image_admin() {
+	public function __construct() {
         add_action('edit_user_profile', array($this, 'edit_image'));
         add_action('show_user_profile', array($this, 'edit_image'));
         add_action('profile_update', array($this, 'save_image'));
@@ -226,4 +226,3 @@ class author_image_admin {
 
 
 $author_image_admin = new author_image_admin();
-?>

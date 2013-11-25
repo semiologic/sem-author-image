@@ -3,19 +3,20 @@
 Plugin Name: Author Image
 Plugin URI: http://www.semiologic.com/software/author-image/
 Description: Adds authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.
-Version: 4.4
+Version: 4.5
 Author: Denis de Bernardy & Mike Koepke
-Author URI: http://www.getsemiologic.com
+Author URI: http://www.semiologic.com
 Text Domain: sem-author-image
 Domain Path: /lang
+License: Dual licensed under the MIT and GPL licenses
 */
 
 /*
 Terms of use
 ------------
 
-This software is copyright Mike Koepke, released under the GPL v2 or later. (http://www.opensource.org/licenses/gpl-2.0.php)
-Based on code (c) Denis de Bernardy, released under the MIT license.
+This software is copyright Denis de Bernardy & Mike Koepke, and is distributed under the terms of the MIT and GPLv2 licenses.
+
 **/
 
 
@@ -39,13 +40,13 @@ if (!defined('SEM_AUTHOR_IMAGE_HEIGHT'))
  **/
 
 class author_image extends WP_Widget {
-    /**
-   	 * author_image()
-   	 *
-   	 * @return void
-   	 **/
+	/**
+	 * constructor
+	 *
+	 * @return \author_image
+	 */
 
-   	function author_image() {
+	public function __construct() {
 
         add_action( 'widgets_init', array($this, 'widgets_init') );
 
@@ -622,7 +623,7 @@ function get_avatar( $id_or_email, $size = '96', $default = '', $alt = false ) {
     }
 
     $avatar = '';
-    if ($id ) {
+    if ( $id && !is_admin() ) {
         global $author_image;
         $avatar = $author_image->get_author_image($id, $size);
     }
@@ -681,4 +682,3 @@ function get_avatar( $id_or_email, $size = '96', $default = '', $alt = false ) {
 	return apply_filters('get_avatar', $avatar, $id_or_email, $size, $default, $alt);
 }
 endif;
-?>

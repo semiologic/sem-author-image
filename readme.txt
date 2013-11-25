@@ -2,7 +2,7 @@
 Contributors: Denis-de-Bernardy, Mike_Koepke
 Tags: author-image, author, semiologic
 Requires at least: 3.1
-Tested up to: 3.6
+Tested up to: 3.7
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -24,7 +24,7 @@ Alternatively, you can place the following call in the loop where you want the a
 
 A second version of this function exists whereby you can pass in width and height to display the image.
 
-    <?php the_author_image($width, $height, $author_id = null); ?>
+    <?php the_author_image_size($width, $height, $author_id = null); ?>
 
 	This $author_id parameter is optional.  If it is not passed in, the code will attempt to get the current author of the page/post.
 
@@ -66,7 +66,7 @@ there is a new field in 'Your Profile' called 'About Me Page'.  Entering a url i
 
 The [Semiologic forum](http://forum.semiologic.com) is the best place to report issues. Please note, however, that while community members and I do our best to answer all queries, we're assisting you on a voluntary basis.
 
-If you require more dedicated assistance, consider using [Semiologic Pro](http://www.getsemiologic.com).
+If you require more dedicated assistance, consider using [Semiologic Pro](http://www.semiologic.com).
 
 
 == Installation ==
@@ -116,6 +116,11 @@ More than likely you have place the the_author_image function call outside of yo
 
 
 == Change Log ==
+
+= 4.5 =
+
+- Fix bug where the author image was shown as the default avatar in the Settings->Discussions screen.
+- WP 3.7 compat
 
 = 4.4 =
 
