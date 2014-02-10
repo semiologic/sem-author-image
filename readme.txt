@@ -62,12 +62,23 @@ Normally the widget will use the author's posts page (/author/authorname/) is th
 
 there is a new field in 'Your Profile' called 'About Me Page'.  Entering a url in this field (/about-me/) will cause the widget to use this link as opposed to /author/authorname.
 
+= Retrieving Author Url =
+
+You can retrieve the url to the respective author image by calling the function
+
+	<?php the_author_image_url($author_id = null); ?>
+
+If $author_id is blank the plugin will attempt to determine the current author and retrieve his/her image.
+
 = Help Me! =
 
 The [Semiologic forum](http://forum.semiologic.com) is the best place to report issues. Please note, however, that while community members and I do our best to answer all queries, we're assisting you on a voluntary basis.
 
 If you require more dedicated assistance, consider using [Semiologic Pro](http://www.semiologic.com).
 
+== Credits ==
+
+Props to By Daniel J. Schneider for author_image_url functionality
 
 == Installation ==
 
@@ -116,6 +127,11 @@ More than likely you have place the the_author_image function call outside of yo
 
 
 == Change Log ==
+
+= 4.6 =
+
+- Added function to retrieve direct link to author's image - the_author_image_url
+- Refactored some of the code around the get_author_.....  type functions
 
 = 4.5.1 =
 

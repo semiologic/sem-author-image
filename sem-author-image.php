@@ -3,7 +3,7 @@
 Plugin Name: Author Image
 Plugin URI: http://www.semiologic.com/software/author-image/
 Description: Adds authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.
-Version: 4.5.1
+Version: 4.6
 Author: Denis de Bernardy & Mike Koepke
 Author URI: http://www.getsemiologic.com
 Text Domain: sem-author-image
@@ -237,17 +237,10 @@ class author_image extends WP_Widget {
 
 	function get($author_id = null, $instance = null, $width = null, $height = null) {
 		if ( !$author_id ) {
-			if ( in_the_loop() ) {
-				$author_id = get_the_author_meta('ID');
-			} elseif ( is_singular() ) {
-				global $wp_the_query;
-				$author_id = $wp_the_query->posts[0]->post_author;
-			} elseif ( is_author() ) {
-				global $wp_the_query;
-				$author_id = $wp_the_query->get_queried_object_id();
-			} else {
+			$author_id = author_image::get_author_id();
+
+			if (!$author_id)
 				return "";
-			}
 		}
 
         $author_image = author_image::get_author_image($author_id, $width, $height);
@@ -278,6 +271,30 @@ class author_image extends WP_Widget {
 			. '</div>' . "\n";
 	} # get()
 
+	/**
+	 * get_author_id()
+	 *
+
+	 * @return int $image
+	 */
+
+	function get_author_id() {
+
+		$author_id = null;
+
+		if ( in_the_loop() ) {
+			$author_id = get_the_author_meta('ID');
+		} elseif ( is_singular() ) {
+			global $wp_the_query;
+			$author_id = $wp_the_query->posts[0]->post_author;
+		} elseif ( is_author() ) {
+			global $wp_the_query;
+			$author_id = $wp_the_query->get_queried_object_id();
+		}
+
+		return $author_id;
+	} #get_author_id()
+
     /**
      * get_author_image()
      *
@@ -289,17 +306,9 @@ class author_image extends WP_Widget {
 
    	function get_author_image($author_id, $width = null, $height = null) {
 
-   		$author_image = get_user_meta($author_id, 'author_image', true);
+   		$author_image = author_image::get_author_image_url($author_id);
 
-   		if ( $author_image === '' )
-   			$author_image = author_image::get_meta($author_id);
-
-   		if ( !$author_image )
-   			return "";
-
-        $author_name = author_image::get_author_name($author_id);
-
-   		$author_image = content_url() . '/authors/' . str_replace(' ', rawurlencode(' '), $author_image);
+	    $author_name = author_image::get_author_name($author_id);
 
         if ( !empty($width) ) {
 	        if ( empty ($height) )
@@ -314,7 +323,36 @@ class author_image extends WP_Widget {
 
         return $author_image;
     } #get_author_image()
-	
+
+	/**
+	* get_author_image_url()
+	*
+	* @param int $author_id
+	* @return string $image
+	*/
+
+	function get_author_image_url($author_id = null) {
+		if ( !$author_id ) {
+			$author_id = author_image::get_author_id();
+
+			if (!$author_id)
+				return "";
+		}
+
+		$author_image = get_user_meta($author_id, 'author_image', true);
+
+		if ( $author_image === '' )
+			$author_image = author_image::get_meta($author_id);
+
+		if ( !$author_image )
+			return "";
+
+		$author_image = content_url() . '/authors/' . str_replace(' ', rawurlencode(' '), $author_image);
+
+		return $author_image;
+	} #get_author_image()
+
+
 	/**
 	 * update()
 	 *
@@ -540,6 +578,20 @@ function the_author_image_size($width, $height, $author_id = null) {
 
 	echo $author_image->get($author_id, null, $width, $height);
 } # the_author_image()
+
+
+/**
+ * the_author_image_url()
+ *
+ * @param null $author_id
+ * @return string
+ */
+
+function the_author_image_url($author_id = null) {
+	global $author_image;
+
+	return $author_image->get_author_image_url($author_id);
+} # the_author_image_url()
 
 /**
  * author_image_admin()
