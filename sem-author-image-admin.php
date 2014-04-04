@@ -6,14 +6,67 @@
  **/
 
 class author_image_admin {
-    /**
-     * constructor
-     */
+	/**
+	 * Plugin instance.
+	 *
+	 * @see get_instance()
+	 * @type object
+	 */
+	protected static $instance = NULL;
+
+	/**
+	 * URL to this plugin's directory.
+	 *
+	 * @type string
+	 */
+	public $plugin_url = '';
+
+	/**
+	 * Path to this plugin's directory.
+	 *
+	 * @type string
+	 */
+	public $plugin_path = '';
+
+	/**
+	 * Access this plugin’s working instance
+	 *
+	 * @wp-hook plugins_loaded
+	 * @return  object of this class
+	 */
+	public static function get_instance()
+	{
+		NULL === self::$instance and self::$instance = new self;
+
+		return self::$instance;
+	}
+
+
+	/**
+	 * Constructor.
+	 *
+	 *
+	 */
+
 	public function __construct() {
-        add_action('edit_user_profile', array($this, 'edit_image'));
+		$this->plugin_url    = plugins_url( '/', __FILE__ );
+		$this->plugin_path   = plugin_dir_path( __FILE__ );
+
+		$this->init();
+    }
+
+
+	/**
+	 * init()
+	 *
+	 * @return void
+	 **/
+	function init() {
+		// more stuff: register actions and filters
+		add_action('edit_user_profile', array($this, 'edit_image'));
         add_action('show_user_profile', array($this, 'edit_image'));
         add_action('profile_update', array($this, 'save_image'));
-    }
+	}
 
     /**
 	 * edit_image()
@@ -224,5 +277,4 @@ class author_image_admin {
 	} # save_image()
 } # author_image_admin
 
-
-$author_image_admin = new author_image_admin();
+$author_image_admin = author_image_admin::get_instance();

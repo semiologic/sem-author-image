@@ -3,7 +3,7 @@
 Plugin Name: Author Image
 Plugin URI: http://www.semiologic.com/software/author-image/
 Description: Adds authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.
-Version: 4.6
+Version: 4.7 dev
 Author: Denis de Bernardy & Mike Koepke
 Author URI: http://www.getsemiologic.com
 Text Domain: sem-author-image
@@ -19,8 +19,6 @@ This software is copyright Denis de Bernardy & Mike Koepke, and is distributed u
 
 **/
 
-
-load_plugin_textdomain('sem-author-image', false, dirname(plugin_basename(__FILE__)) . '/lang');
 
 if ( !defined('sem_author_image_debug') )
 	define('sem_author_image_debug', false);
@@ -41,21 +39,77 @@ if (!defined('SEM_AUTHOR_IMAGE_HEIGHT'))
 
 class author_image extends WP_Widget {
 	/**
-	 * constructor
+	 * Plugin instance.
 	 *
-	 * @return \author_image
+	 * @see get_instance()
+	 * @type object
+	 */
+	protected static $instance = NULL;
+
+	/**
+	 * URL to this plugin's directory.
+	 *
+	 * @type string
+	 */
+	public $plugin_url = '';
+
+	/**
+	 * Path to this plugin's directory.
+	 *
+	 * @type string
+	 */
+	public $plugin_path = '';
+
+	/**
+	 * Access this plugin’s working instance
+	 *
+	 * @wp-hook plugins_loaded
+	 * @return  object of this class
+	 */
+	public static function get_instance()
+	{
+		NULL === self::$instance and self::$instance = new self;
+
+		return self::$instance;
+	}
+
+	/**
+	 * Loads translation file.
+	 *
+	 * Accessible to other classes to load different language files (admin and
+	 * front-end for example).
+	 *
+	 * @wp-hook init
+	 * @param   string $domain
+	 * @return  void
+	 */
+	public function load_language( $domain )
+	{
+		load_plugin_textdomain(
+			$domain,
+			FALSE,
+			$this->plugin_path . 'lang'
+		);
+	}
+
+	/**
+	 * Constructor.
+	 *
+	 *
 	 */
 
 	public function __construct() {
+		$this->plugin_url    = plugins_url( '/', __FILE__ );
+		$this->plugin_path   = plugin_dir_path( __FILE__ );
+		$this->load_language( 'sem-author-image' );
 
-        add_action( 'widgets_init', array($this, 'widgets_init') );
+		add_action( 'plugins_loaded', array ( $this, 'init' ) );
 
    		$widget_ops = array(
    			'classname' => 'author_image',
    			'description' => __('Displays the post author\'s image', 'sem-author-image'),
    			);
 
-   		$this->init();
    		$this->WP_Widget('author_image', __('Author Image', 'sem-author-image'), $widget_ops);
    	} # author_image()
 
@@ -78,9 +132,27 @@ class author_image extends WP_Widget {
 				}
 			}
 		}
+
+		// more stuff: register actions and filters
+		add_action( 'widgets_init', array($this, 'widgets_init') );
+
+		if ( is_admin() ) {
+			foreach ( array('profile', 'user-edit') as $hook ) {
+				add_action("load-$hook.php", array($this, 'author_image_admin'));
+			}
+		}
 	} # init()
 	
-	
+
+	/**
+	 * author_image_admin()
+	 *
+	 * @return void
+	 **/
+	function author_image_admin() {
+		include_once $this->plugin_path . '/sem-author-image-admin.php';
+	} # author_image_admin()
+
 	/**
 	 * widgets_init()
 	 *
@@ -559,9 +631,7 @@ class author_image extends WP_Widget {
  */
 
 function the_author_image($author_id = null) {
-    global $author_image;
-
-	echo $author_image->get($author_id, null);
+	echo author_image::get_instance()->get($author_id, null);
 } # the_author_image()
 
 /**
@@ -574,9 +644,7 @@ function the_author_image($author_id = null) {
  */
 
 function the_author_image_size($width, $height, $author_id = null) {
-    global $author_image;
-
-	echo $author_image->get($author_id, null, $width, $height);
+	echo author_image::get_instance()->get($author_id, null, $width, $height);
 } # the_author_image()
 
 
@@ -588,9 +656,7 @@ function the_author_image_size($width, $height, $author_id = null) {
  */
 
 function the_author_image_url($author_id = null) {
-	global $author_image;
-
-	return $author_image->get_author_image_url($author_id);
+	return author_image::get_instance()->get_author_image_url($author_id);
 } # the_author_image_url()
 
 /**
@@ -598,25 +664,6 @@ function the_author_image_url($author_id = null) {
  *
  * @return void
  **/
-
-function author_image_admin() {
-	include_once dirname(__FILE__) . '/sem-author-image-admin.php';
-} # author_image_admin()
-
-
-if ( !function_exists('load_multipart_user') ) :
-function load_multipart_user() {
-	include_once dirname(__FILE__) . '/multipart-user/multipart-user.php';
-} # load_multipart_user()
-endif;
-
-foreach ( array('profile', 'user-edit') as $hook ) {
-	add_action("load-$hook.php", 'author_image_admin');
-	add_action("load-$hook.php", 'load_multipart_user');
-}
-
-$author_image = new author_image();
-
 
 
 if ( !function_exists( 'get_avatar' ) ) :
@@ -676,8 +723,7 @@ function get_avatar( $id_or_email, $size = '96', $default = '', $alt = false ) {
 
     $avatar = '';
     if ( $id && !is_admin() ) {
-        global $author_image;
-        $avatar = $author_image->get_author_image($id, $size);
+        $avatar = author_image::get_instance()->get_author_image($id, $size);
     }
 
     if ( empty($avatar) ) {
@@ -734,3 +780,14 @@ function get_avatar( $id_or_email, $size = '96', $default = '', $alt = false ) {
 	return apply_filters('get_avatar', $avatar, $id_or_email, $size, $default, $alt);
 }
 endif;
+
+if ( !function_exists('load_multipart_user') ) :
+function load_multipart_user() {
+	include_once dirname(__FILE__) . '/multipart-user/multipart-user.php';
+} # load_multipart_user()
+endif;
+
+if ( is_admin() ) {
+	foreach ( array('profile', 'user-edit') as $hook )
+		add_action("load-$hook.php", 'load_multipart_user');
+}

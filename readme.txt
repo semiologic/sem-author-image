@@ -128,6 +128,10 @@ More than likely you have place the the_author_image function call outside of yo
 
 == Change Log ==
 
+= 4.7 =
+
+- Code refactoring
+
 = 4.6 =
 
 - Added function to retrieve direct link to author's image - the_author_image_url
