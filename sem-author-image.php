@@ -3,7 +3,7 @@
 Plugin Name: Author Image
 Plugin URI: http://www.semiologic.com/software/author-image/
 Description: Adds authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.
-Version: 4.7 dev
+Version: 4.7
 Author: Denis de Bernardy & Mike Koepke
 Author URI: http://www.getsemiologic.com
 Text Domain: sem-author-image
@@ -623,6 +623,9 @@ class author_image extends WP_Widget {
 } # author_image
 
 
+$author_image = author_image::get_instance();
+
+
 /**
  * the_author_image()
  *
@@ -631,7 +634,8 @@ class author_image extends WP_Widget {
  */
 
 function the_author_image($author_id = null) {
-	echo author_image::get_instance()->get($author_id, null);
+	global $author_image;
+	echo $author_image->get($author_id, null);
 } # the_author_image()
 
 /**
@@ -644,7 +648,8 @@ function the_author_image($author_id = null) {
  */
 
 function the_author_image_size($width, $height, $author_id = null) {
-	echo author_image::get_instance()->get($author_id, null, $width, $height);
+	global $author_image;
+	echo $author_image->get($author_id, null, $width, $height);
 } # the_author_image()
 
 
@@ -656,7 +661,8 @@ function the_author_image_size($width, $height, $author_id = null) {
  */
 
 function the_author_image_url($author_id = null) {
-	return author_image::get_instance()->get_author_image_url($author_id);
+	global $author_image;
+	return $author_image->get_author_image_url($author_id);
 } # the_author_image_url()
 
 /**
@@ -771,6 +777,7 @@ function get_avatar( $id_or_email, $size = '96', $default = '', $alt = false ) {
             if ( !empty( $rating ) )
                 $out .= "&amp;r={$rating}";
 
+	        $out = str_replace( '&#038;', '&amp;', esc_url( $out ) );
             $avatar = "<img alt='{$safe_alt}' src='{$out}' class='avatar avatar-{$size} photo' height='{$size}' width='{$size}' />";
         } else {
             $avatar = "<img alt='{$safe_alt}' src='{$default}' class='avatar avatar-{$size} photo avatar-default' height='{$size}' width='{$size}' />";
@@ -791,3 +798,4 @@ if ( is_admin() ) {
 	foreach ( array('profile', 'user-edit') as $hook )
 		add_action("load-$hook.php", 'load_multipart_user');
 }
+
