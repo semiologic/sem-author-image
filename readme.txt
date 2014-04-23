@@ -128,6 +128,10 @@ More than likely you have place the the_author_image function call outside of yo
 
 == Change Log ==
 
+= 4.7.1 =
+
+- Fix localization
+
 = 4.7 =
 
 - Code refactoring
