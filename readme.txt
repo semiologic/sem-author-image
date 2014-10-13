@@ -121,12 +121,24 @@ Two constants can be set in your `wp-config.php` file to set the max size of the
 
 The default values for these settings are 250 x 250.
 
+= Can I Make changes to the Author's Bio Before it is Displayed =
+
+There is a filter called author_image_bio that can be used to modify the bio text.
+
 = Nothing is Displaying =
 
 More than likely you have place the the_author_image function call outside of your template's posts loop so the author cannot be determined.  Trying passing in an author id directly.
 
 
 == Change Log ==
+
+= 4.8 =
+
+- Fix <a link incorrectly being generated for authors that have no image
+- Author photo is now left-aligned when a bio output is selected
+- New author_image_bio filter to override the output bio
+- Fixed various non-static function call warnings with php 5.4+
+- WP 4.0 compat
 
 = 4.7.1 =
 

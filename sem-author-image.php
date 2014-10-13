@@ -3,7 +3,7 @@
 Plugin Name: Author Image
 Plugin URI: http://www.semiologic.com/software/author-image/
 Description: Adds authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.
-Version: 4.7.1
+Version: 4.8
 Author: Denis de Bernardy & Mike Koepke
 Author URI: http://www.getsemiologic.com
 Text Domain: sem-author-image
@@ -214,7 +214,7 @@ class author_image extends WP_Widget {
 		echo $image . "\n";
 		
 		if ( $desc )
-			echo wpautop(apply_filters('widget_text', $desc));
+			echo apply_filters('author_image_bio', wpautop( $desc ));
 		
 		echo $after_widget;
 	} # widget()
@@ -226,7 +226,7 @@ class author_image extends WP_Widget {
 	 * @return int $author_id
 	 **/
 	
-	function get_single_id() {
+	static function get_single_id() {
 		$author_id = get_transient('author_image_cache');
 		
 		if ( $author_id && !sem_author_image_debug ) {
@@ -307,7 +307,7 @@ class author_image extends WP_Widget {
 	 * @return string $image
 	 */
 
-	function get($author_id = null, $instance = null, $width = null, $height = null) {
+	static function get($author_id = null, $instance = null, $width = null, $height = null) {
 		if ( !$author_id ) {
 			$author_id = author_image::get_author_id();
 
@@ -338,7 +338,7 @@ class author_image extends WP_Widget {
 				. '</a>';
 		}
 		
-		return '<div class="entry_author_image">'
+		return '<div class="entry_author_image' . ($bio ? " alignleft" : "") . '">'
 			. $author_image
 			. '</div>' . "\n";
 	} # get()
@@ -350,7 +350,7 @@ class author_image extends WP_Widget {
 	 * @return int $image
 	 */
 
-	function get_author_id() {
+	static function get_author_id() {
 
 		$author_id = null;
 
@@ -376,21 +376,23 @@ class author_image extends WP_Widget {
      * @return string $image
      */
 
-   	function get_author_image($author_id, $width = null, $height = null) {
+	static function get_author_image($author_id, $width = null, $height = null) {
 
    		$author_image = author_image::get_author_image_url($author_id);
 
-	    $author_name = author_image::get_author_name($author_id);
+	    if ( $author_image != '' ) {
+		    $author_name = author_image::get_author_name($author_id);
 
-        if ( !empty($width) ) {
-	        if ( empty ($height) )
-		        $height = $width;
+	        if ( !empty($width) ) {
+		        if ( empty ($height) )
+			        $height = $width;
+		            $author_image = '<img src="' . esc_url($author_image) . '" alt="' . $author_name
+		               . '" width="'. $width . '" height="' . $height . '" />';
+	        }
+		    else {
 	            $author_image = '<img src="' . esc_url($author_image) . '" alt="' . $author_name
-	               . '" width="'. $width . '" height="' . $height . '" />';
-        }
-	    else {
-   		    $author_image = '<img src="' . esc_url($author_image) . '" alt="' . $author_name
-                . '" />';
+	                . '" />';
+		    }
 	    }
 
         return $author_image;
@@ -403,7 +405,7 @@ class author_image extends WP_Widget {
 	* @return string $image
 	*/
 
-	function get_author_image_url($author_id = null) {
+	static function get_author_image_url($author_id = null) {
 		if ( !$author_id ) {
 			$author_id = author_image::get_author_id();
 
@@ -413,7 +415,7 @@ class author_image extends WP_Widget {
 
 		$author_image = get_user_meta($author_id, 'author_image', true);
 
-		if ( $author_image === '' )
+		if ( $author_image === '' || $author_image == '0' )
 			$author_image = author_image::get_meta($author_id);
 
 		if ( !$author_image )
@@ -529,7 +531,7 @@ class author_image extends WP_Widget {
 	 * @return array $instance
 	 **/
 	
-	function defaults() {
+	static function defaults() {
 		return array(
 			'title' => '',
 			'bio' => false,
@@ -577,7 +579,7 @@ class author_image extends WP_Widget {
 					set_transient('author_image_cache', $author_id);
 			}
 		} else {
-			$author_image = 0;
+			$author_image = '';
 		}
 		
 		update_user_meta($author_id, 'author_image', $author_image);
@@ -593,7 +595,7 @@ class author_image extends WP_Widget {
    	 * @return string $author_name
    	 **/
 
-   	function get_author_name($author_id) {
+	static function get_author_name($author_id) {
    		$user = get_userdata($author_id);
    		$author_name = $user->display_name;
 
@@ -634,8 +636,7 @@ $author_image = author_image::get_instance();
  */
 
 function the_author_image($author_id = null) {
-	global $author_image;
-	echo $author_image->get($author_id, null);
+	echo author_image::get($author_id, null);
 } # the_author_image()
 
 /**
@@ -648,8 +649,7 @@ function the_author_image($author_id = null) {
  */
 
 function the_author_image_size($width, $height, $author_id = null) {
-	global $author_image;
-	echo $author_image->get($author_id, null, $width, $height);
+	echo author_image::get($author_id, null, $width, $height);
 } # the_author_image()
 
 
@@ -661,8 +661,7 @@ function the_author_image_size($width, $height, $author_id = null) {
  */
 
 function the_author_image_url($author_id = null) {
-	global $author_image;
-	return $author_image->get_author_image_url($author_id);
+	return author_image::get_author_image_url($author_id);
 } # the_author_image_url()
 
 /**
@@ -714,9 +713,11 @@ function get_avatar( $id_or_email, $size = '96', $default = '', $alt = false ) {
 			$user = get_userdata($id);
 			if ( $user)
 				$email = $user->user_email;
-		} elseif ( !empty($id_or_email->comment_author_email) ) {
-			$email = $id_or_email->comment_author_email;
 		}
+
+		if ( ! $email && ! empty( $id_or_email->comment_author_email ) )
+			$email = $id_or_email->comment_author_email;
+
 	} else {
 		$email = $id_or_email;
 	}
@@ -780,7 +781,8 @@ function get_avatar( $id_or_email, $size = '96', $default = '', $alt = false ) {
 	        $out = str_replace( '&#038;', '&amp;', esc_url( $out ) );
             $avatar = "<img alt='{$safe_alt}' src='{$out}' class='avatar avatar-{$size} photo' height='{$size}' width='{$size}' />";
         } else {
-            $avatar = "<img alt='{$safe_alt}' src='{$default}' class='avatar avatar-{$size} photo avatar-default' height='{$size}' width='{$size}' />";
+	        $out = esc_url( $default );
+            $avatar = "<img alt='{$safe_alt}' src='{$out}' class='avatar avatar-{$size} photo avatar-default' height='{$size}' width='{$size}' />";
         }
     }
 
