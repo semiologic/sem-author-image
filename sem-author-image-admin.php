@@ -150,7 +150,7 @@ class author_image_admin {
       		. '<th><label for="sem_aboutme_page">About Me Page</label></th>'
       		. '<td>'
       		. '<input type="text" name="sem_aboutme_page" id="sem_aboutme_page" value="' . esc_attr( get_the_author_meta( 'sem_aboutme_page', $author_id ) ) .'" class="regular-text" /><br />'
-      	    . '<span class="description">Please enter an alternate About Me page for the image' . "'s url.</span>"
+      	    . '<span class="description">Please enter an alternate About Me page full url for the image' . "'s url.</span>"
       		. '</td>'
       		. '</tr>';
 
@@ -271,7 +271,8 @@ class author_image_admin {
 		delete_transient('author_image_cache');
 		delete_user_meta($user_ID, 'author_image_cache');
 
-	    update_user_meta( $user_ID, 'sem_aboutme_page', $_POST['sem_aboutme_page'] );
+		$about_url = sanitize_text_field($_POST['sem_aboutme_page']);
+		update_user_meta( $user_ID, 'sem_aboutme_page', $about_url );
 		
 		return $user_ID;
 	} # save_image()

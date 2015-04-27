@@ -2,7 +2,7 @@
 Contributors: Denis-de-Bernardy, Mike_Koepke
 Tags: author-image, author, semiologic
 Requires at least: 3.1
-Tested up to: 4.0
+Tested up to: 4.2
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -131,6 +131,11 @@ More than likely you have place the the_author_image function call outside of yo
 
 
 == Change Log ==
+
+= 4.8.1 =
+
+- Security update: Escape URLs returned by add_query_arg and remove_query_arg
+- Ensure Alternate About Page is being sanitized.
 
 = 4.8 =
 
