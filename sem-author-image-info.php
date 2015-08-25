@@ -1,4 +1,4 @@
 <?php
 __('Author Image', 'sem-author-image');
-__('Adds authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.', 'sem-author-image');
+__('Add an image for an Author(s) on your site, which individual users can configure by editing their profile.', 'sem-author-image');
 ?>

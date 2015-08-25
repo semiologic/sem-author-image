@@ -2,7 +2,7 @@
 Contributors: Denis-de-Bernardy, Mike_Koepke
 Tags: author-image, author, semiologic
 Requires at least: 3.1
-Tested up to: 4.2
+Tested up to: 4.3
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -14,7 +14,8 @@ Lets you easily add author images on your site.
 
 The Author Image plugin for WordPress lets you easily add author images on your site.
 
-It creates a widget that you can insert in a sidebar, or much about anywhere if using the [Semiologic theme](http://www.semiologic.com/software/sem-reloaded/).
+It creates a widget that you can insert in a sidebar or any other widget area allowed by your theme.
+The plugin now supports a short code [author-image] you cna use to directly add the image to the page or post content.
 
 Alternatively, you can place the following call in the loop where you want the author image to appear:
 
@@ -30,11 +31,18 @@ A second version of this function exists whereby you can pass in width and heigh
 
 To configure your author image, browse Users / Your Profile in the admin area.
 
+
 = Setting Author Image Size =
 
 You can adjust the actual display size in the Author Image widget or by using the_author_image_size function call.
 
 If you do not specify a size the width and height of the actual image will be used.
+
+
+= Shortcode =
+
+You can use [author-image] to display the uploaded author image in your page/post content.
+
 
 = Author's Bio =
 
@@ -42,13 +50,16 @@ You can configure the widget so it outputs the author's description in addition 
 
 This fits well on a site where the author's image is placed in a sidebar, or the [Semiologic theme](http://www.semiologic.com/software/sem-reloaded/) when the widget is placed immediately after the posts' content -- i.e. "About The Author."
 
+
 = Gravatar Support =
 
 The uploaded image will be used as your gravatar by themes that call the get_avatar() function.  This will override an image set on gravatar.com
 
+
 = Multi-Author Sites =
 
 For sites with multitudes of authors, the widget offers the ability to insert a link to the author's posts -- his archives.
+
 
 = Single Author Sites =
 
@@ -56,11 +67,13 @@ Normally the widget will only display an author image when it can clearly identi
 
 If you run a single author site, or a site with multiple ghost writers, be sure to check the "This site has a single author" option. The widget will then output your image at all times.
 
+
 = Alternate About Page Link =
 
 Normally the widget will use the author's posts page (/author/authorname/) is the image is clicked on.   If your site has a dedicated page for the author, such as an 'About Me' page,
 
 there is a new field in 'Your Profile' called 'About Me Page'.  Entering a url in this field (/about-me/) will cause the widget to use this link as opposed to /author/authorname.
+
 
 = Retrieving Author Url =
 
@@ -70,15 +83,16 @@ You can retrieve the url to the respective author image by calling the function
 
 If $author_id is blank the plugin will attempt to determine the current author and retrieve his/her image.
 
+
 = Help Me! =
 
-The [Semiologic forum](http://forum.semiologic.com) is the best place to report issues. Please note, however, that while community members and I do our best to answer all queries, we're assisting you on a voluntary basis.
+The [Plugin's Forum](https://wordpress.org/support/plugin/sem-author-image) is the best place to report issues.
 
-If you require more dedicated assistance, consider using [Semiologic Pro](http://www.semiologic.com).
 
 == Credits ==
 
 Props to By Daniel J. Schneider for author_image_url functionality
+
 
 == Installation ==
 
@@ -131,6 +145,15 @@ More than likely you have place the the_author_image function call outside of yo
 
 
 == Change Log ==
+
+= 4.9 =
+
+- New author-image shortcode
+- Added get_author_image() wrapper function
+- Reworked gravatar support code.   Now applies the class of 'avatar photo' to the image for proper theme styling
+- Updated to use PHP5 constructors as WP deprecated PHP4 constructor type in 4.3.
+- WP 4.3 compat
+- Tested against PHP 5.6
 
 = 4.8.1 =
 
