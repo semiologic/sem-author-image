@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Author Image
-Plugin URI: http://www.semiologic.com/software/author-image/
+Plugin URI: https://www.semiologic.com/software/author-image/
 Description: Adds authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.
-Version: 4.9
+Version: 4.9.1
 Author: Denis de Bernardy & Mike Koepke
-Author URI: http://www.getsemiologic.com
+Author URI: https://www.semiologic.com
 Text Domain: sem-author-image
 Domain Path: /lang
 License: Dual licensed under the MIT and GPLv2 licenses
@@ -723,38 +723,16 @@ if ( !function_exists( 'get_avatar' ) ) :
  * @return string <img> tag for the user's avatar
 */
 function get_avatar( $id_or_email, $size = 96, $default = '', $alt = '', $args = null ) {
-	$defaults = array(
-		// get_avatar_data() args.
-		'size'          => 96,
-		'height'        => null,
-		'width'         => null,
-		'default'       => get_option( 'avatar_default', 'mystery' ),
-		'force_default' => false,
-		'rating'        => get_option( 'avatar_rating' ),
-		'scheme'        => null,
-		'alt'           => '',
-		'class'         => null,
-		'force_display' => false,
-		'extra_attr'    => '',
-	);
+	if ( ! get_option('show_avatars') )
+		return false;
 
-	if ( empty( $args ) ) {
-		$args = array();
-	}
+	if ( false === $alt)
+		$safe_alt = '';
+	else
+		$safe_alt = esc_attr( $alt );
 
-	$args['size']    = (int) $size;
-	$args['default'] = $default;
-	$args['alt']     = $alt;
-
-	$args = wp_parse_args( $args, $defaults );
-
-	if ( empty( $args['height'] ) ) {
-		$args['height'] = $args['size'];
-	}
-	if ( empty( $args['width'] ) ) {
-		$args['width'] = $args['size'];
-	}
-
+	if ( !is_numeric($size) )
+		$size = '96';
 
 	// find avatar for user
 	$email = '';
@@ -800,80 +778,69 @@ function get_avatar( $id_or_email, $size = 96, $default = '', $alt = '', $args =
     }
 
     if ( empty($avatar) ) {
-	    /**
-	   	 * Filter whether to retrieve the avatar URL early.
-	   	 *
-	   	 * Passing a non-null value will effectively short-circuit get_avatar(), passing
-	   	 * the value through the {@see 'pre_get_avatar'} filter and returning early.
-	   	 *
-	   	 * @since 4.2.0
-	   	 *
-	   	 * @param string            $avatar      HTML for the user's avatar. Default null.
-	   	 * @param int|object|string $id_or_email A user ID, email address, or comment object.
-	   	 * @param array             $args        Arguments passed to get_avatar_url(), after processing.
-	   	 */
-	   	$avatar = apply_filters( 'pre_get_avatar', null, $id_or_email, $args );
+	    if ( empty($default) ) {
+	     $avatar_default = get_option('avatar_default');
+	     if ( empty($avatar_default) )
+	         $default = 'mystery';
+	     else
+	         $default = $avatar_default;
+	    }
 
-	   	if ( ! is_null( $avatar ) ) {
-	   		/** This filter is documented in wp-includes/pluggable.php */
-	   		return apply_filters( 'get_avatar', $avatar, $id_or_email, $args['size'], $args['default'], $args['alt'], $args );
-	   	}
+		if ( !empty($email) )
+	        $email_hash = md5( strtolower( trim( $email ) ) );
 
-	   	if ( ! $args['force_display'] && ! get_option( 'show_avatars' ) ) {
-	   		return false;
-	   	}
+		if ( is_ssl() ) {
+		    $host = 'https://secure.gravatar.com';
+		} else {
+		    if ( !empty($email) )
+		        $host = sprintf( "http://%d.gravatar.com", ( hexdec( $email_hash[0] ) % 2 ) );
+		    else
+		         $host = 'http://0.gravatar.com';
+		}
 
-	   	$url2x = get_avatar_url( $id_or_email, array_merge( $args, array( 'size' => $args['size'] * 2 ) ) );
+		if ( 'mystery' == $default )
+		    $default = "$host/avatar/ad516503a11cd5ca435acc9bb6523536?s={$size}"; // ad516503a11cd5ca435acc9bb6523536 == md5('unknown@gravatar.com')
+		elseif ( 'blank' == $default )
+		    $default = $email ? 'blank' : includes_url( 'images/blank.gif' );
+		elseif ( !empty($email) && 'gravatar_default' == $default )
+		    $default = '';
+		elseif ( 'gravatar_default' == $default )
+		    $default = "$host/avatar/?s={$size}";
+		elseif ( empty($email) )
+		    $default = "$host/avatar/?d=$default&amp;s={$size}";
+		elseif ( strpos($default, 'http://') === 0 )
+		    $default = esc_url( add_query_arg( 's', $size, $default ) );
 
-	   	$args = get_avatar_data( $id_or_email, $args );
+		if ( !empty($email) ) {
+		    $out = "$host/avatar/";
+		    $out .= $email_hash;
+		    $out .= '?s='.$size;
+		    $out .= '&amp;d=' . urlencode( $default );
 
-	   	$url = $args['url'];
+		    $rating = get_option('avatar_rating');
+		    if ( !empty( $rating ) )
+		        $out .= "&amp;r={$rating}";
 
-	   	if ( ! $url || is_wp_error( $url ) ) {
-	   		return false;
-	   	}
-
-	   	$class = array( 'avatar', 'avatar-' . (int) $args['size'], 'photo' );
-
-	   	if ( ! $args['found_avatar'] || $args['force_default'] ) {
-	   		$class[] = 'avatar-default';
-	   	}
-
-	   	if ( $args['class'] ) {
-	   		if ( is_array( $args['class'] ) ) {
-	   			$class = array_merge( $class, $args['class'] );
-	   		} else {
-	   			$class[] = $args['class'];
-	   		}
-	   	}
-
-	   	$avatar = sprintf(
-	   		"<img alt='%s' src='%s' srcset='%s' class='%s' height='%d' width='%d' %s/>",
-	   		esc_attr( $args['alt'] ),
-	   		esc_url( $url ),
-	   		esc_attr( "$url2x 2x" ),
-	   		esc_attr( join( ' ', $class ) ),
-	   		(int) $args['height'],
-	   		(int) $args['width'],
-	   		$args['extra_attr']
-	   	);
-
+			$out = str_replace( '&#038;', '&amp;', esc_url( $out ) );
+		        $avatar = "<img alt='{$safe_alt}' src='{$out}' class='avatar avatar-{$size} photo' height='{$size}' width='{$size}' />";
+		} else {
+			$out = esc_url( $default );
+		    $avatar = "<img alt='{$safe_alt}' src='{$out}' class='avatar avatar-{$size} photo avatar-default' height='{$size}' width='{$size}' />";
+		}
     }
 
 	/**
 	 * Filter the avatar to retrieve.
 	 *
 	 * @since 2.5.0
-	 * @since 4.2.0 The `$args` parameter was added.
 	 *
-	 * @param string            $avatar      &lt;img&gt; tag for the user's avatar.
+	 * @param string            $avatar      Image tag for the user's avatar.
 	 * @param int|object|string $id_or_email A user ID, email address, or comment object.
 	 * @param int               $size        Square avatar width and height in pixels to retrieve.
 	 * @param string            $alt         Alternative text to use in the avatar image tag.
 	 *                                       Default empty.
-	 * @param array             $args        Arguments passed to get_avatar_data(), after processing.
 	 */
-	return apply_filters( 'get_avatar', $avatar, $id_or_email, $args['size'], $args['default'], $args['alt'], $args );
+	return apply_filters( 'get_avatar', $avatar, $id_or_email, $size, $default, $alt );
 }
 endif;
 

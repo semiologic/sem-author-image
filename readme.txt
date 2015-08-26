@@ -146,6 +146,10 @@ More than likely you have place the the_author_image function call outside of yo
 
 == Change Log ==
 
+= 4.9.1 =
+
+- Oh well.  Used 4.2 only gravatar code that broke non-WP 4.2 sites.   Put back old stuff
+
 = 4.9 =
 
 - New author-image shortcode
