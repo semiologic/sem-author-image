@@ -3,7 +3,7 @@
 Plugin Name: Author Image
 Plugin URI: https://www.semiologic.com/software/author-image/
 Description: Adds authors images to your site, which individual users can configure in their profile. Your wp-content folder needs to be writable by the server.
-Version: 4.9.1
+Version: 4.9.2
 Author: Denis de Bernardy & Mike Koepke
 Author URI: https://www.semiologic.com
 Text Domain: sem-author-image
@@ -562,7 +562,10 @@ class author_image extends WP_Widget {
 	static function get_meta($author_id) {
 		$user = get_userdata($author_id);
 		$author_login = $user->user_login;
-		
+
+		if ( empty( $user->user_login ) )
+			return false;
+
 		if ( defined('GLOB_BRACE') ) {
 			if ( $author_image = glob(WP_CONTENT_DIR . '/authors/' . $author_login . '{,-*}.{jpg,jpeg,png}', GLOB_BRACE) )
 				$author_image = current($author_image);

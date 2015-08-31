@@ -1,5 +1,6 @@
 === Author Image ===
 Contributors: Denis-de-Bernardy, Mike_Koepke
+Donate link: https://www.semiologic.com/donate/
 Tags: author-image, author, semiologic
 Requires at least: 3.1
 Tested up to: 4.3
@@ -145,6 +146,10 @@ More than likely you have place the the_author_image function call outside of yo
 
 
 == Change Log ==
+
+= 4.9.2 =
+
+- Make sure we actually found user before attempting to get its upload photo.  props maxfenton
 
 = 4.9.1 =
 
