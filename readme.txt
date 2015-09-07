@@ -147,6 +147,10 @@ More than likely you have place the the_author_image function call outside of yo
 
 == Change Log ==
 
+= 4.9.3 =
+
+- Back out the 4.9.2 change for now.
+
 = 4.9.2 =
 
 - Make sure we actually found user before attempting to get its upload photo.  props maxfenton
