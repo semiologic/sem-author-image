@@ -563,8 +563,8 @@ class author_image extends WP_Widget {
 		$user = get_userdata($author_id);
 		$author_login = $user->user_login;
 
-//		if ( empty( $user->user_login ) )
-//			return false;
+		if ( empty( $user->user_login ) )
+			return false;
 
 		if ( defined('GLOB_BRACE') ) {
 			if ( $author_image = glob(WP_CONTENT_DIR . '/authors/' . $author_login . '{,-*}.{jpg,jpeg,png}', GLOB_BRACE) )
